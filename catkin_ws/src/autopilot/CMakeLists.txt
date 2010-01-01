@@ -5,9 +5,7 @@ project(autopilot)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  bldc_mc
-  get_imu
-  get_uss
+  estimate_position
   roscpp
   rospy
   std_msgs

@@ -1,10 +1,12 @@
 <launch>
-  <node pkg="bldc_mc" type="bldc_mc" name="bldc_mc">
-  </node>
   <node pkg="get_uss" type="talker" name="US_range_data">
   </node>
+  <node pkg="get_imu" type="talker.py" name="imu_data">
+  </node>
+  <node pkg="bldc_mc" type="bldc_mc" name="bldc_mc">
+  </node>
   <node pkg="estimate_position" type="estimate_position" name="pos_est">
-  </node>
-  <node pkg="autopilot" type="autopilot" name="Autopilot">
-  </node>
+  </node> 
+  <node pkg="autopilot" type="autopilot.py" name="Autopilot">
+  </node> 
 </launch>
