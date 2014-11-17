@@ -1,6 +1,7 @@
 ROS support for 1:8 scale vehicle
 
 Hardware:
+
 *  Motorcontroller:
  * http://vedder.se/2014/01/a-custom-bldc-motor-controller/
 * IMU
