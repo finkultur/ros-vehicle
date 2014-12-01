@@ -130,7 +130,8 @@ static uint8_t readAccel(float* data)
     uint8_t start_reg = 0x27 | 0x80;
     uint8_t out[7];
     i2cAcquireBus(&I2CD1);
-    msg_t f = i2cMasterTransmitTimeout(&I2CD1, 0x19, &start_reg, 1, out, 7, TIME_INFINITE);
+    msg_t f = i2cMasterTransmitTimeout(
+      &I2CD1, 0x19, &start_reg, 1, out, 7, TIME_INFINITE);
     (void)f;
     i2cReleaseBus(&I2CD1);
     if (out[0] & 0x8) {
@@ -150,10 +151,11 @@ static uint8_t readMag(float* data)
     uint8_t start_reg = 0x03;
     uint8_t out[7];
     i2cAcquireBus(&I2CD1);
-    msg_t f = i2cMasterTransmitTimeout(&I2CD1, 0x1E, &start_reg, 1, out, 7, TIME_INFINITE);
+    msg_t f = i2cMasterTransmitTimeout(
+        &I2CD1, 0x1E, &start_reg, 1, out, 7, TIME_INFINITE);
     (void)f;
     i2cReleaseBus(&I2CD1);
-    //out[6] doesn't seem to reflect actual new data, so just push out every time
+    // out[6] doesn't seem to reflect actual new data, so just push out every time
     int16_t val_x = (out[0] << 8) | out[1];
     int16_t val_z = (out[2] << 8) | out[3];
     int16_t val_y = (out[4] << 8) | out[5];
@@ -164,7 +166,6 @@ static uint8_t readMag(float* data)
 }
 
 int main(void) {
-
     halInit();
     chSysInit();
 
@@ -183,24 +184,30 @@ int main(void) {
     initMag();
     chThdSleepMilliseconds(500);
 			
-	while(TRUE)
-	{
+	while(TRUE) {
 		int receive = chnGetTimeout(&SDU1, TIME_IMMEDIATE);
 		chThdSleepMilliseconds(10);
 
-		if(((char) receive) == 'r')
-		{
-			while (TRUE)
-			{
-				float gyroData[3];
-    			float accelData[3];
-    			float magData[3];
+		if (((char) receive) == 'r') {
+			while (TRUE) {
+        float gyroData[3];
+    		float accelData[3];
+    		float magData[3];
 
-				if (readGyro(gyroData) && readAccel(accelData) && readMag(magData)) 
-				{
-				    chprintf((BaseSequentialStream *)&SDU1, "gyro:%f:%f:%f\n", gyroData[0], gyroData[1], gyroData[2]);
-				    chprintf((BaseSequentialStream *)&SDU1, "accl:%f:%f:%f\n", accelData[0], accelData[1], accelData[2]);
-				    chprintf((BaseSequentialStream *)&SDU1, "mag:%f:%f:%f\n", magData[0], magData[1], magData[2]);
+				if (readGyro(gyroData) && readAccel(accelData) && readMag(magData)) {
+          chprintf((BaseSequentialStream *)&SDU1, 
+            "%f,%f,%f:%f,%f,%f:%f,%f,%f\n",
+            gyroData[0], gyroData[1], gyroData[2],
+            accelData[0], accelData[1], accelData[2],
+            magData[0], magData[1], magData[2]);
+				  /*
+          chprintf((BaseSequentialStream *)&SDU1, 
+            "gyro:%f:%f:%f\n", gyroData[0], gyroData[1], gyroData[2]);
+				  chprintf((BaseSequentialStream *)&SDU1, 
+            "accl:%f:%f:%f\n", accelData[0], accelData[1], accelData[2]);
+				  chprintf((BaseSequentialStream *)&SDU1, 
+            "mag:%f:%f:%f\n", magData[0], magData[1], magData[2]);
+          */
 					break;
 				}
 			}
