@@ -19,3 +19,4 @@ Gulliver
 Gulliver.pro.user
 **/**/doxygen/latex/
 **/**/doxygen/html/
+build/

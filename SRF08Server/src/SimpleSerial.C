@@ -36,33 +36,35 @@ int main(int argc, char* argv[])
    try {
       SimpleSerial serial("/dev/ttyUSB0", 19200);
 
-      uint8_t cmd[5] = {0x5A, 0x01, 0x00, 0x00};
+      uint8_t cmd[5] = {0x5A, 0x01, 0x00, 0x00}; // returns the rev for the I2C circurit
       serial.writeString(cmd, 4);
       uint32_t res = serial.readChar();
       cout<< "Firmware Version: " << std::hex << res <<endl;
 
-      uint8_t start = 0xE0;
+      // ???
       cmd[0] = 0x55;
-      cmd[1] = 0xE1;
+      cmd[1] = 0xE8+1;
       cmd[2] = 0x00;
       cmd[3] = 0x01;
       serial.writeString(cmd, 4);
-       res = serial.readChar();
+      res = serial.readChar();
       cout<< "ret: " << std::hex << res <<endl;
 
+	  // Starts the SRF08 at address 0xE8 to ranging
       cmd[0] = 0x55;
-      cmd[1] = 0xE0;
+      cmd[1] = 0xE8;
       cmd[2] = 0x00;
       cmd[3] = 0x01;
-      cmd[4] = 0x51;
+      cmd[4] = 0x51; // cm
       serial.writeString(cmd, 5);
       res = serial.readChar();
       cout<< "range succ: " << std::hex << res <<endl;
 
+	  // Read range from SRF08
       cmd[3] = 0xFF;
       do {
          cmd[0] = 0x55;
-         cmd[1] = 0xE1;
+         cmd[1] = 0xE8+1;
          cmd[2] = 0x00;
          cmd[3] = 0x04;
          serial.writeString(cmd, 4);
@@ -80,3 +82,4 @@ int main(int argc, char* argv[])
       return 1;
    }
 }
+
