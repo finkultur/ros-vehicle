@@ -1,0 +1,9 @@
+float64 gyro0
+float64 gyro1
+float64 gyro2
+float64 acc0
+float64 acc1
+float64 acc2
+float64 mag0
+float64 mag1
+float64 mag2

@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "read_discovery_data")
+set(read_discovery_data_MAINTAINER "faj <vikni@student.chalmers.se>")
+set(read_discovery_data_DEPRECATED "")
+set(read_discovery_data_VERSION "0.0.0")
+set(read_discovery_data_BUILD_DEPENDS "message_generation" "roscpp" "rospy" "std_msgs")
+set(read_discovery_data_RUN_DEPENDS "message_runtime" "roscpp" "rospy" "std_msgs")
+set(read_discovery_data_BUILDTOOL_DEPENDS "catkin")

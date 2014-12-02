@@ -1,0 +1,8 @@
+prefix=/home/faj/catkin_ws/devel
+
+Name: read_srf_data
+Description: Description of read_srf_data
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/faj/catkin_ws/devel/lib 
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/faj/catkin_ws/install
+
+Name: read_discovery_data
+Description: Description of read_discovery_data
+Version: 0.0.0
+Cflags: -I/home/faj/catkin_ws/install/include
+Libs: -L/home/faj/catkin_ws/install/lib 
+Requires: roscpp rospy std_msgs message_runtime
