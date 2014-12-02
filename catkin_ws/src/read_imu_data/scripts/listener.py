@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2008, Willow Garage, Inc.
+# Copyright (c) 2014, Viktor Nilsson.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,11 @@
 #
 # Revision $Id$
 
-## Simple talker demo that listens to std_msgs/Strings published 
-## to the 'chatter' topic
+## Listens to the topic 'imu_data' and prints the data.
 
 import rospy
 from std_msgs.msg import String
-from read_discovery_data.msg import IMUData
+from read_imu_data.msg import IMUData
 
 def callback(data):
     rospy.loginfo(rospy.get_name() + 
