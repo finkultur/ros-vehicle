@@ -1,8 +1,8 @@
-prefix=/home/faj/catkin_ws/install
+prefix=/home/ros/dat295/vehicle/catkin_ws/install
 
 Name: read_srf_data
 Description: Description of read_srf_data
 Version: 0.0.0
 Cflags: 
-Libs: -L/home/faj/catkin_ws/install/lib 
+Libs: -L/home/ros/dat295/vehicle/catkin_ws/install/lib 
 Requires: 

@@ -1,6 +1,6 @@
 FILE(REMOVE_RECURSE
   "CMakeFiles/read_imu_data_generate_messages_cpp"
-  "/home/faj/catkin_ws/devel/include/read_imu_data/IMUData.h"
+  "/home/ros/dat295/vehicle/catkin_ws/devel/include/read_imu_data/IMUData.h"
 )
 
 # Per-language clean rules from dependency scanning.
