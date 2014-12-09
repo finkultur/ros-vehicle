@@ -1,2 +1,2 @@
 - setup-file:
-    local-name: /home/ros/dat295/vehicle/catkin_ws/devel/setup.sh
+    local-name: /home/ros/git/dat295/vehicle/catkin_ws/devel/setup.sh
