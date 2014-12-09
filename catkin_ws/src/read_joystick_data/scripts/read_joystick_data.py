@@ -37,27 +37,37 @@
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import Joy
+from ackermann_msgs.msg import AckermannDrive
 
-def callback(data):
+## axes[4] right trigger
+## axes[0] left stick left/right
+
+def callback(data, pub):
     rospy.loginfo(rospy.get_name() + "I heard this: \n")
   
+    degree = joyAngleToDegree(data.axes[0])
     current = speedToCurrent(data.axes[4])
+    
+    rospy.loginfo("Setting degree to %f\n", degree)
     rospy.loginfo("Setting current to %f\n", current)
-    #setCurrent(current)
+
+    # Create AckermannDrive msg
+    drive = AckermannDrive()
+    drive.steering_angle = degree
+    drive.speed = current
+    
+    # Publish under topic 'motor_controller'
+    pub.publish(drive)
+
  
     
-def listener():
-    # in ROS, nodes are unique named. If two nodes with the same
-    # node are launched, the previous one is kicked off. The 
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'talker' node so that multiple talkers can
-    # run simultaenously.
-    rospy.init_node('joy_listener', anonymous=True)
-    rospy.Subscriber("joy", Joy, callback)
-
-    # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
-
+def init():
+    # Publish under topic 'motor_controller'
+    pub = rospy.Publisher('motor_controller', AckermannDrive, queue_size=20)
+    
+    # Subscribs to 'joy'
+    rospy.Subscriber("joy", Joy, callback, pub)
+       
 
 # Converts a keypress (between 1.0 and -1.0) to a current in Ampere
 def speedToCurrent(speed):
@@ -72,8 +82,20 @@ def speedToCurrent(speed):
     current = speed*3
 
   return current
+  
+# Converts from joystick angle to steering angle
+def joyAngleToDegree(angle):
+    degree = 30*angle
+    
+    ## Only able to drive left
+    if degree <= 0:
+        degree = 0
+    
+    return degree
 
         
 if __name__ == '__main__':
-    listener()
+    rospy.init_node('joy_listener_talker', anonymous=True)
+    init()
+    rospy.spin()
 
