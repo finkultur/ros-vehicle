@@ -1,8 +1,8 @@
-prefix=/home/ros/dat295/vehicle/catkin_ws/devel
+prefix=/home/ros/git/dat295/vehicle/catkin_ws/devel
 
 Name: read_imu_data
 Description: Description of read_imu_data
 Version: 0.0.1
-Cflags: -I/home/ros/dat295/vehicle/catkin_ws/devel/include
-Libs: -L/home/ros/dat295/vehicle/catkin_ws/devel/lib 
+Cflags: -I/home/ros/git/dat295/vehicle/catkin_ws/devel/include
+Libs: -L/home/ros/git/dat295/vehicle/catkin_ws/devel/lib 
 Requires: roscpp rospy std_msgs message_runtime

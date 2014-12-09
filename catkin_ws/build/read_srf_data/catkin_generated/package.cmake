@@ -1,7 +1,0 @@
-set(_CATKIN_CURRENT_PACKAGE "read_srf_data")
-set(read_srf_data_MAINTAINER "faj <vikni@student.chalmers.se>")
-set(read_srf_data_DEPRECATED "")
-set(read_srf_data_VERSION "0.0.0")
-set(read_srf_data_BUILD_DEPENDS "roscpp" "rospy" "std_msgs")
-set(read_srf_data_RUN_DEPENDS "roscpp" "rospy" "std_msgs")
-set(read_srf_data_BUILDTOOL_DEPENDS "catkin")

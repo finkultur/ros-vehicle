@@ -1,9 +1,0 @@
-FILE(REMOVE_RECURSE
-  "CMakeFiles/read_discovery_data_generate_messages_lisp"
-  "/home/faj/catkin_ws/devel/share/common-lisp/ros/read_discovery_data/msg/IMUData.lisp"
-)
-
-# Per-language clean rules from dependency scanning.
-FOREACH(lang)
-  INCLUDE(CMakeFiles/read_discovery_data_generate_messages_lisp.dir/cmake_clean_${lang}.cmake OPTIONAL)
-ENDFOREACH(lang)
