@@ -44,8 +44,9 @@ using namespace boost;
 
 int init_mc();
 int set_speed(float speed);
-void set_steering(float angle, float angle_velocity);
+int set_steering(float angle, float angle_velocity);
 unsigned short crc16(const unsigned char *buf, unsigned int len);
+int send_packet(const unsigned char *data, int len);
 
 Serial* mc;
 
@@ -78,10 +79,8 @@ int init_mc() {
   Sends a speed command to the motor controller.
 */
 int set_speed(float speed) {
-
   const int len = 5; // Speed commands are 5 bytes long
   uint8_t cmd[len] = {0x02, 0x00, 0x00, 0x00, 0x00};
-  
   uint32_t speed_in_mA = int(1000*speed);
 
   //memcpy(&cmd[1], &speed_in_mA, sizeof(uint32_t));  
@@ -94,12 +93,45 @@ int set_speed(float speed) {
   printf("Command to be sent: %02x, %02x, %02x, %02x, %02x\n",
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
 
-  // Why is this not in a separate function, you may ask
+  return send_packet(cmd, len);
+}
+
+/*
+  Sends a steering command to the motor controller. 
+*/
+int set_steering(float angle, float angle_velocity) {
+  const int len = 2;
+  uint8_t cmd[len] = {0x06, 0x00};
+  uint8_t offset = uint8_t(angle*1.6);
+  cmd[1] = offset;
+
+  cout << "Angle to be set: " 
+       << int(offset) << " in some unit" << endl; 
+  printf("Angle Command to be sent: %02x, %02x\n", cmd[0], cmd[1]);
+  
+  return send_packet(cmd, len);
+}
+
+/*
+  From bldc-tool/packetinterface.cpp.
+*/
+unsigned short crc16(const unsigned char *buf, unsigned int len) {
+  unsigned int i;
+  unsigned short cksum = 0;
+  for (i = 0; i < len; i++) {
+    cksum = crc16_tab[(((cksum >> 8) ^ *buf++) & 0xFF)] ^ (cksum << 8);
+  }
+  return cksum;
+}
+
+int send_packet(const unsigned char *data, int len) {
   unsigned char buffer[len + 5];
   buffer[0] = 2;
   buffer[1] = len;
-  memcpy(buffer+2, cmd, len);
-  unsigned short crc = crc16(cmd, len);
+
+  memcpy(buffer + 2, data, len);
+
+  unsigned short crc = crc16(data, len);
   buffer[len + 2] = crc >> 8;
   buffer[len + 3] = crc;
   buffer[len + 4] = 3;
@@ -111,25 +143,7 @@ int set_speed(float speed) {
     return 1;
   }
   return 0;
-}
 
-/*
-  Sends a steering command to the motor controller. 
-*/
-void set_steering(float angle, float angle_velocity) {
-  // Not implemented
-}
-
-/*
-  From bldc-tool/packetinterface.cpp.
-*/
-unsigned short crc16(const unsigned char *buf, unsigned int len) {
-    unsigned int i;
-    unsigned short cksum = 0;
-    for (i = 0; i < len; i++) {
-        cksum = crc16_tab[(((cksum >> 8) ^ *buf++) & 0xFF)] ^ (cksum << 8);
-    }
-    return cksum;
 }
 
 /*
