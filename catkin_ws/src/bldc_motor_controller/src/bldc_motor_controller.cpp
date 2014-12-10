@@ -6,7 +6,7 @@
 #include <sstream>
 #include "Serial.hpp"
 
-using namespace {
+namespace {
 const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
   0x50a5, 0x60c6, 0x70e7, 0x8108, 0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad,
   0xe1ce, 0xf1ef, 0x1231, 0x0210, 0x3273, 0x2252, 0x52b5, 0x4294, 0x72f7,
@@ -41,41 +41,19 @@ const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
 using namespace std;
 using namespace boost;
 
+
+int init_mc();
+int set_speed(float speed);
+void set_steering(float angle, float angle_velocity);
 unsigned short crc16(const unsigned char *buf, unsigned int len);
 
 Serial* mc;
 
 /*
-  No comments.
-*/
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "BLDC Motor Controller Actuator");
-  ros::NodeHandle n;
-
-  if (init_mc() != 0) {
-    // ERROR
-    return -1;
-  }
-
-  ros::Subscriber sub = n.subscribe("motor_controller", 1000, callback);
-  ros::spin();
-
-  return 0;
-}
-
-/*
   When a msg is received, we log the msg and set steering angle and speed.
 */
-void callback(const ackermann_msgs::AckermannDrive::ConstPTr& msg) {
-  ROS_INFO("Got a message!: \n
-           Steering angle: %f\n
-           Steering angle velocity: %f\n
-           Speed: %f\n
-           Acceleration: %f\n
-           Jerk: %f\n",
-           msg->steering_angle, msg_steering_angle_velocity, msg->speed,
-           msg->acceleration, msg->jerk);
+void callback(const ackermann_msgs::AckermannDrive::ConstPtr& msg) {
+  ROS_INFO("Got a message!: \nSteering angle: %f\nSteering angle velocity:%f\nSpeed: %f\nAcceleration: %f\nJerk: %f\n", msg->steering_angle, msg->steering_angle_velocity, msg->speed,msg->acceleration, msg->jerk);
 
   set_speed(msg->speed);
   set_steering(msg->steering_angle, msg->steering_angle_velocity); 
@@ -101,7 +79,7 @@ int init_mc() {
 */
 int set_speed(float speed) {
 
-  int len = 5; // Speed commands are 5 bytes long
+  const int len = 5; // Speed commands are 5 bytes long
   unsigned char cmd[len] = {0x02, 0x00, 0x00, 0x00, 0x00};
   
   uint32_t speed_in_mA = (int) 1000*speed;
@@ -120,8 +98,8 @@ int set_speed(float speed) {
   buffer[len + 4] = 3;
 
   try {
-    serial.writeString(buffer, len+5);
-  catch (boost::system::system_error& e) {
+    mc->writeString(buffer, len+5);
+  } catch (boost::system::system_error& e) {
     cout << "Error: " << e.what() << endl;
     return 1;
   }
@@ -145,5 +123,24 @@ unsigned short crc16(const unsigned char *buf, unsigned int len) {
         cksum = crc16_tab[(((cksum >> 8) ^ *buf++) & 0xFF)] ^ (cksum << 8);
     }
     return cksum;
+}
+
+/*
+  No comments.
+*/
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "BLDC Motor Controller Actuator");
+  ros::NodeHandle n;
+
+  if (init_mc() != 0) {
+    // ERROR
+    return -1;
+  }
+
+  ros::Subscriber sub = n.subscribe("motor_controller", 1000, callback);
+  ros::spin();
+
+  return 0;
 }
 
