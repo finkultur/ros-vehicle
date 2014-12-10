@@ -81,7 +81,7 @@ int init_mc() {
 int set_speed(float speed) {
   const int len = 5; // Speed commands are 5 bytes long
   uint8_t cmd[len] = {0x02, 0x00, 0x00, 0x00, 0x00};
-  uint32_t speed_in_mA = int(1000*speed);
+  int32_t speed_in_mA = -int(1000*speed);
 
   //memcpy(&cmd[1], &speed_in_mA, sizeof(uint32_t));  
   cmd[1] = speed_in_mA >> 24;
@@ -93,6 +93,7 @@ int set_speed(float speed) {
   printf("Command to be sent: %02x, %02x, %02x, %02x, %02x\n",
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
 
+  //return 0;
   return send_packet(cmd, len);
 }
 
@@ -102,7 +103,7 @@ int set_speed(float speed) {
 int set_steering(float angle, float angle_velocity) {
   const int len = 2;
   uint8_t cmd[len] = {0x06, 0x00};
-  uint8_t offset = uint8_t(angle*1.6);
+  uint8_t offset = uint8_t(angle);
   cmd[1] = offset;
 
   cout << "Angle to be set: " 
