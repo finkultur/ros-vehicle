@@ -103,16 +103,20 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-# add_executable(read_srf_data_node src/read_srf_data_node.cpp)
+add_executable(read_srf_data_listener src/read_srf_data_listener.cpp)
+add_executable(read_srf_data_talker src/read_srf_data_talker.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(read_srf_data_node read_srf_data_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(read_srf_data_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(read_srf_data_listener
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(read_srf_data_talker
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##

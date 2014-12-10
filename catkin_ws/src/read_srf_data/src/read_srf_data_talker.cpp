@@ -60,8 +60,8 @@ int main(int argc, char **argv)
 	ros::Publisher SRF08_sensor_1 = n.advertise<sensor_msgs::Range>("SRF08_sensor_1", 1000);
 	
 	try {
-		sensor_1 = new Serial("/dev/ttyUSB0", 19200);
-		sensor_2 = new Serial("/dev/ttyUSB1", 19200);	
+		sensor_0 = new Serial("/dev/ttyUSB0", 19200);
+		sensor_1 = new Serial("/dev/ttyUSB1", 19200);	
 	} catch(boost::system::system_error& e) {
 		std::stringstream ss;
 		ss << "Error, cant open Serial USB!\n" << "Error msg: " << e.what();
