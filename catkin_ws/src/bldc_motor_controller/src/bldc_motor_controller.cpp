@@ -80,13 +80,20 @@ int init_mc() {
 int set_speed(float speed) {
 
   const int len = 5; // Speed commands are 5 bytes long
-  unsigned char cmd[len] = {0x02, 0x00, 0x00, 0x00, 0x00};
+  uint8_t cmd[len] = {0x02, 0x00, 0x00, 0x00, 0x00};
   
-  uint32_t speed_in_mA = (int) 1000*speed;
-  memcpy(&speed_in_mA, &cmd+1, 4);
-  // Hopefully, if speed_in_mA is 2000==0x07D0,
-  // cmd should be equal to 0x02, 0x00, 0x00, 0x07, 0xD0
-   
+  uint32_t speed_in_mA = int(1000*speed);
+
+  //memcpy(&cmd[1], &speed_in_mA, sizeof(uint32_t));  
+  cmd[1] = speed_in_mA >> 24;
+  cmd[2] = speed_in_mA >> 16;
+  cmd[3] = speed_in_mA >> 8;
+  cmd[4] = speed_in_mA;
+ 
+  cout << "Speed to be set: " << std::dec << speed_in_mA << "mA" << endl; 
+  printf("Command to be sent: %02x, %02x, %02x, %02x, %02x\n",
+          cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
+
   // Why is this not in a separate function, you may ask
   unsigned char buffer[len + 5];
   buffer[0] = 2;
@@ -130,7 +137,7 @@ unsigned short crc16(const unsigned char *buf, unsigned int len) {
 */
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "BLDC Motor Controller Actuator");
+  ros::init(argc, argv, "BLDC_Motor_Controller_Actuator");
   ros::NodeHandle n;
 
   if (init_mc() != 0) {
