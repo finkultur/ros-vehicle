@@ -11,3 +11,7 @@ Hardware:
  * SRF08
  * USB 2 I2C
   * http://www.robot-electronics.co.uk/htm/usb_i2c_tech.htm
+
+We have forked Benjamins code for the motor controller.
+Our fork is on github:
+* https://github.com/finkultur/bldc
