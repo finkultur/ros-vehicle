@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="read_joystick_data" type="read_joystick_data.py" name="rjd">
+  </node>
+  <node pkg="bldc_motor_controller" type="bldc_motor_controller" name="bldc_mc">
+  </node>
+</launch>
