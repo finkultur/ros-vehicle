@@ -158,7 +158,9 @@ int set_steering(float angle, float angle_velocity) {
   uint8_t cmd[len] = {0x15, 0x00, 0x00, 0x00, 0x00};
 
   // The angle we get in is a flow in range[-55, 55]
-  int16_t position = int16_t(angle);
+  /* We do not know why 112 seems to be the standard position,
+     but it will keep the wheels in default position. */
+  int16_t position = int16_t(angle)+112;
   cmd[2] = position >> 8;
   cmd[3] = position;
 
