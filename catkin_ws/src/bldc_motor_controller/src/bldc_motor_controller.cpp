@@ -41,7 +41,6 @@ const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
 using namespace std;
 using namespace boost;
 
-
 int init_mc();
 int set_speed(float speed);
 int set_steering(float angle, float angle_velocity);
@@ -60,6 +59,10 @@ void callback(const ackermann_msgs::AckermannDrive::ConstPtr& msg) {
   set_steering(msg->steering_angle, msg->steering_angle_velocity); 
 }
 
+/*
+  Initializes the motor controller.
+  Just opens the serial port.
+*/
 int init_mc() {
   std::stringstream ss;
   
@@ -77,6 +80,7 @@ int init_mc() {
 
 /*
   Sends a speed command to the motor controller.
+  Parameter speed is given in ampere.
 */
 int set_speed(float speed) {
   const int len = 5; // Speed commands are 5 bytes long
@@ -90,10 +94,9 @@ int set_speed(float speed) {
   cmd[4] = speed_in_mA;
  
   cout << "Speed to be set: " << std::dec << speed_in_mA << "mA" << endl; 
-  printf("Command to be sent: %02x, %02x, %02x, %02x, %02x\n",
+  printf("Speed command to be sent: %02x, %02x, %02x, %02x, %02x\n",
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
 
-  //return 0;
   return send_packet(cmd, len);
 }
 
@@ -118,14 +121,14 @@ int set_steering(float angle, float angle_velocity) {
 */
 
 /*
-  Sends a steering command to the motor controller which in turn calls the
+  Sends a steering command to the motor controller, which in turn calls the
   function servo_move().
+  TODO: Figure out the units of the parameters.
 */
-
 int set_steering(float angle, float angle_velocity) {
   const int len = 5; // servo_move command is 5 bytes long
   /*
-  cmd[0]: what command (0x15 == 21)
+  cmd[0]: what command (0x15 == 21 == COMM_SERVO_MOVE)
   cmd[1]: what servo (assuming servo 0)
   cmd[2-3]: what position (based on angle)
   cmd[4]: what speed (0 to move instantly)
@@ -141,11 +144,11 @@ int set_steering(float angle, float angle_velocity) {
   printf("Servo move command to be sent: %02x, %02x, %02x, %02x, %02x\n",
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
  
-  return 0; 
-  //return send_packet(cmd, len);
+  return send_packet(cmd, len);
 }
 
 /*
+  Calculates a checksum of the given data.
   From bldc-tool/packetinterface.cpp.
 */
 unsigned short crc16(const unsigned char *buf, unsigned int len) {
@@ -157,6 +160,10 @@ unsigned short crc16(const unsigned char *buf, unsigned int len) {
   return cksum;
 }
 
+/*
+  Sends a command to the motor controller over serial. Appends a checksum.
+  From bldc-tool/packetinterface.cpp.
+*/
 int send_packet(const unsigned char *data, int len) {
   unsigned char buffer[len + 5];
   buffer[0] = 2;
@@ -176,7 +183,6 @@ int send_packet(const unsigned char *data, int len) {
     return 1;
   }
   return 0;
-
 }
 
 /*
