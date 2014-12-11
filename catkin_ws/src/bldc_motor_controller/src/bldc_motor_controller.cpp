@@ -98,8 +98,11 @@ int set_speed(float speed) {
 }
 
 /*
-  Sends a steering command to the motor controller. 
+  Sends a steering command to the motor controller,
+  which sets the servo offset. Unfortunately we seem to only be able to turn 
+  left by doing this. 
 */
+/*
 int set_steering(float angle, float angle_velocity) {
   const int len = 2;
   uint8_t cmd[len] = {0x06, 0x00};
@@ -111,6 +114,35 @@ int set_steering(float angle, float angle_velocity) {
   printf("Angle Command to be sent: %02x, %02x\n", cmd[0], cmd[1]);
   
   return send_packet(cmd, len);
+}
+*/
+
+/*
+  Sends a steering command to the motor controller which in turn calls the
+  function servo_move().
+*/
+
+int set_steering(float angle, float angle_velocity) {
+  const int len = 5; // servo_move command is 5 bytes long
+  /*
+  cmd[0]: what command (0x15 == 21)
+  cmd[1]: what servo (assuming servo 0)
+  cmd[2-3]: what position (based on angle)
+  cmd[4]: what speed (0 to move instantly)
+  */
+  uint8_t cmd[len] = {0x15, 0x00, 0x00, 0x00, 0x00};
+
+  // The angle we get in is a flow in range[-55, 55]
+  int16_t position = int16_t(angle);
+  cmd[2] = position >> 8;
+  cmd[3] = position;
+
+  cout << "Position to be set: " << position << endl; 
+  printf("Servo move command to be sent: %02x, %02x, %02x, %02x, %02x\n",
+          cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
+ 
+  return 0; 
+  //return send_packet(cmd, len);
 }
 
 /*
