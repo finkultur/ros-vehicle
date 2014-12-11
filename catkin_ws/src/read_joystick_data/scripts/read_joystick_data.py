@@ -33,7 +33,6 @@
 #
 # Revision $Id$
 
-
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import Joy
@@ -41,7 +40,6 @@ from ackermann_msgs.msg import AckermannDrive
 
 ## axes[4] right trigger
 ## axes[0] left stick left/right
-
 def callback(data, pub):
     rospy.loginfo(rospy.get_name() + "I heard this: \n")
   
@@ -58,12 +56,11 @@ def callback(data, pub):
     
     # Publish under topic 'motor_controller'
     pub.publish(drive)
-
  
     
 def init():
     # Publish under topic 'motor_controller'
-    pub = rospy.Publisher('motor_controller', AckermannDrive, queue_size=20)
+    pub = rospy.Publisher('motor_controller_commands', AckermannDrive, queue_size=20)
     
     # Subscribs to 'joy'
     rospy.Subscriber("joy", Joy, callback, pub)
@@ -77,16 +74,16 @@ def speedToCurrent(speed):
   if speed < 0.1:
     current = 0
   elif speed < 0.3:
-    current = 0.9
+    current = 1.0
   else:
-    current = speed*3
+    current = speed*4
 
   return current
-  
+ 
+ 
 # Converts from joystick angle to steering angle
 def joyAngleToDegree(angle):
-    degree = 55*angle
-    
+    degree = 60*angle
     return degree
 
         
