@@ -93,7 +93,7 @@ int set_rpm(float speed) {
   cmd[3] = rpm >> 8;
   cmd[4] = rpm;
 
-  cout << "RPM to be set: " << std::dec << speed_in_mA << "mA" << endl;
+  cout << "RPM to be set: " << std::dec << rpm << "mA" << endl;
   printf("SET_RPM command to be sent: %02x, %02x, %02x, %02x, %02x\n",
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
 
@@ -222,7 +222,7 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  ros::Subscriber sub = n.subscribe("motor_controller", 1000, callback);
+  ros::Subscriber sub = n.subscribe("motor_controller_commands", 1000, callback);
   ros::spin();
 
   return 0;
