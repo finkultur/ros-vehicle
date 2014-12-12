@@ -40,11 +40,14 @@ from ackermann_msgs.msg import AckermannDrive
 
 ## axes[4] right trigger
 ## axes[0] left stick left/right
+## buttons[1] B?
 def callback(data, pub):
     rospy.loginfo(rospy.get_name() + "I heard this: \n")
   
+    if data.buttons[1] == 0: direction = 1
+    else: direction = -1
     degree = joyAngleToDegree(data.axes[0])
-    current = speedToCurrent(data.axes[4])
+    current = speedToCurrent(data.axes[4])*direction
     
     rospy.loginfo("Setting degree to %f\n", degree)
     rospy.loginfo("Setting current to %f\n", current)
@@ -66,24 +69,24 @@ def init():
     rospy.Subscriber("joy", Joy, callback, pub)
        
 
-# Converts a keypress (between 1.0 and -1.0) to a current in Ampere
+# Converts a keypress (between 1.0 and -1.0) to a current in Ampere.
 def speedToCurrent(speed):
   # For convenience, we want a value between 0.0 and 1.0
   speed = -((speed-1)/2)
 
-  if speed < 0.1:
+  if speed < 0.2:
     current = 0
   elif speed < 0.3:
     current = 1.0
   else:
-    current = speed*4
+    current = speed*6
 
   return current
  
  
 # Converts from joystick angle to steering angle
 def joyAngleToDegree(angle):
-    degree = 60*angle
+    degree = 57*angle
     return degree
 
         
