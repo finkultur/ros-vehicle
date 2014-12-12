@@ -80,6 +80,28 @@ int init_mc() {
 
 /*
   Sends a speed command to the motor controller.
+  Parameter speed is assumed to be given as rpm/1000.
+*/
+int set_rpm(float speed) {
+  const int len = 5; // SET_RPM commands are 5 bytes long
+  uint8_t cmd[len] = {0x04, 0x00, 0x00, 0x00, 0x00};
+  int32_t rpm = -int(1000*speed);
+
+  //memcpy(&cmd[1], &speed_in_mA, sizeof(uint32_t)); 
+  cmd[1] = rpm >> 24;
+  cmd[2] = rpm >> 16;
+  cmd[3] = rpm >> 8;
+  cmd[4] = rpm;
+
+  cout << "RPM to be set: " << std::dec << speed_in_mA << "mA" << endl;
+  printf("SET_RPM command to be sent: %02x, %02x, %02x, %02x, %02x\n",
+          cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
+
+  return send_packet(cmd, len);
+}
+
+/*
+  Sends a speed command to the motor controller.
   Parameter speed is given in ampere.
 */
 int set_speed(float speed) {
