@@ -46,7 +46,7 @@ const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
 using namespace std;
 using namespace boost;
 
-uint32_t get_values(Serial* serial, uint8_t addr);
+uint32_t get_values();
 int recv_packet();
 int init_mc(void);
 void process_data(const unsigned char *data, int len);
@@ -57,7 +57,7 @@ int16_t buffer_get_int16(const uint8_t *buffer, int32_t *index);
 
 Serial* mc;
 
-uint32_t get_values(Serial* serial, uint8_t addr) {
+uint32_t get_values() {
   unsigned char cmd[1] = {0x00};
   send_packet(cmd, 1);
   recv_packet();
@@ -228,6 +228,8 @@ int main(int argc, char **argv)
 	//ros::Publisher SRF08_sensor_0 = n.advertise<sensor_msgs::Range>("SRF08_sensor_0", 1000);
 
   init_mc();	
+
+  get_values();
 
 	while (ros::ok()) {
 		//msg_sensor_0.range = get_reading(sensor_0, 0xE2)/100.0;
