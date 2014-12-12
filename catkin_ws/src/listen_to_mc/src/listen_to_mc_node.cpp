@@ -54,6 +54,7 @@ void process_packet(const unsigned char *data, int len);
 int send_packet(const unsigned char *data, int len); 
 uint16_t crc16(const unsigned char *buf, unsigned int len);
 int16_t buffer_get_int16(const uint8_t *buffer, int32_t *index);
+int32_t buffer_get_int32(const uint8_t *buffer, int32_t *index);
 
 Serial* mc;
 
@@ -140,28 +141,26 @@ void process_packet(const unsigned char *data, int len) {
     case 0: //0 == COMM_GET_VALUES
       ind = 0;
       printf("TEMP MOS1: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
-      /*
-      values.temp_mos1 = ((double)buffer_get_int16(data, &ind)) / 10.0;
-      values.temp_mos2 = ((double)buffer_get_int16(data, &ind)) / 10.0;
-      values.temp_mos3 = ((double)buffer_get_int16(data, &ind)) / 10.0;
-      values.temp_mos4 = ((double)buffer_get_int16(data, &ind)) / 10.0;
-      values.temp_mos5 = ((double)buffer_get_int16(data, &ind)) / 10.0;
-      values.temp_mos6 = ((double)buffer_get_int16(data, &ind)) / 10.0;
-      values.temp_pcb = ((double)buffer_get_int16(data, &ind)) / 10.0;
-      values.current_motor = ((double)buffer_get_int32(data, &ind)) / 100.0;
-      values.current_in = ((double)buffer_get_int32(data, &ind)) / 100.0;
-      values.duty_now = ((double)buffer_get_int16(data, &ind)) / 1000.0;
-      values.rpm = (double)buffer_get_int32(data, &ind);
-      values.v_in = ((double)buffer_get_int16(data, &ind)) / 10.0;
-      values.amp_hours = ((double)buffer_get_int32(data, &ind)) / 10000.0;
-      values.amp_hours_charged = ((double)buffer_get_int32(data, &ind)) / 10000.0;
-      values.watt_hours = ((double)buffer_get_int32(data, &ind)) / 10000.0;
-      values.watt_hours_charged = ((double)buffer_get_int32(data, &ind)) / 10000.0;
-      values.tachometer = buffer_get_int32(data, &ind);
-      values.tachometer_abs = buffer_get_int32(data, &ind);
-      values.fault_code = (mc_fault_code)data[ind++];
-      values.fault_str = faultToStr(values.fault_code);
-      */
+      printf("TEMP MOS2: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP MOS3: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP MOS4: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP MOS5: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP MOS6: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP PCB: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+
+      printf("Current motor: %f\n", ((double)buffer_get_int32(data, &ind)) / 100.0);
+      printf("Current in: %f\n", ((double)buffer_get_int32(data, &ind)) / 100.0);
+      printf("Duty now: %f\n", ((double)buffer_get_int16(data, &ind)) / 1000.0);
+      printf("RPM: %f\n", ((double)buffer_get_int32(data, &ind)));
+      printf("V in: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("Amp hours: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
+      printf("Amp hours charged: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
+      printf("Watt hours: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
+      printf("Watt hours charged: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
+      printf("Tachometer: %f\n", ((double)buffer_get_int32(data, &ind)));
+      printf("Tachometer abs: %f\n", ((double)buffer_get_int32(data, &ind)));
+      //printf("Fault code: %i\n", data[ind++]);
+       
       break;
 
     default:
@@ -212,6 +211,14 @@ int16_t buffer_get_int16(const uint8_t *buffer, int32_t *index) {
   return res;
 }
 
+int32_t buffer_get_int32(const uint8_t *buffer, int32_t *index) {
+  int32_t res = ((uint32_t) buffer[*index]) << 24 |
+          ((uint32_t) buffer[*index + 1]) << 16 |
+          ((uint32_t) buffer[*index + 2]) << 8 |
+          ((uint32_t) buffer[*index + 3]);
+  *index += 4;
+  return res;
+}
 
 int main(int argc, char **argv)
 {	
