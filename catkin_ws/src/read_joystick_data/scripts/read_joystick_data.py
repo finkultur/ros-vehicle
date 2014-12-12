@@ -86,7 +86,7 @@ def speedToCurrent(speed):
  
 # Converts from joystick angle to steering angle
 def joyAngleToDegree(angle):
-    degree = 57*angle
+    degree = 59*angle
     return degree
 
         
