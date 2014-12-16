@@ -45,7 +45,12 @@ int init_mc();
 int set_speed(float speed);
 int set_steering(float angle, float angle_velocity);
 unsigned short crc16(const unsigned char *buf, unsigned int len);
+int16_t buffer_get_int16(const uint8_t *buffer, int32_t *index);
+int32_t buffer_get_int32(const uint8_t *buffer, int32_t *index);
+void process_packet(const unsigned char *data, int len);
 int send_packet(const unsigned char *data, int len);
+int recv_packet();
+uint32_t get_values();
 
 Serial* mc;
 
@@ -56,7 +61,7 @@ void callback(const ackermann_msgs::AckermannDrive::ConstPtr& msg) {
   ROS_INFO("Got a message!: \nSteering angle: %f\nSteering angle velocity:%f\nSpeed: %f\nAcceleration: %f\nJerk: %f\n", msg->steering_angle, msg->steering_angle_velocity, msg->speed,msg->acceleration, msg->jerk);
 
   set_speed(msg->speed);
-  set_steering(msg->steering_angle, msg->steering_angle_velocity); 
+  set_steering(msg->steering_angle, msg->steering_angle_velocity);
 }
 
 /*
@@ -184,6 +189,22 @@ unsigned short crc16(const unsigned char *buf, unsigned int len) {
   return cksum;
 }
 
+int16_t buffer_get_int16(const uint8_t *buffer, int32_t *index) {
+  int16_t res = ((uint16_t) buffer[*index]) << 8 |
+          ((uint16_t) buffer[*index + 1]);
+  *index += 2;
+  return res;
+}
+
+int32_t buffer_get_int32(const uint8_t *buffer, int32_t *index) {
+  int32_t res = ((uint32_t) buffer[*index]) << 24 |
+          ((uint32_t) buffer[*index + 1]) << 16 |
+          ((uint32_t) buffer[*index + 2]) << 8 |
+          ((uint32_t) buffer[*index + 3]);
+  *index += 4;
+  return res;
+}
+
 /*
   Sends a command to the motor controller over serial. Appends a checksum.
   From bldc-tool/packetinterface.cpp.
@@ -209,6 +230,93 @@ int send_packet(const unsigned char *data, int len) {
   return 0;
 }
 
+int recv_packet() {
+  std::stringstream ss;
+
+  uint8_t status;
+  uint8_t len;
+  uint8_t crc_high;
+  uint8_t crc_low;
+
+  unsigned char recv[256];
+
+  try {
+    status = mc->readChar();
+    if (status != 2) {
+      return -1;
+    }
+    len = mc->readChar();
+    for (int i=0; i<len; i++) {
+      recv[i] = mc->readChar();
+    }
+    crc_high = mc->readChar();
+    crc_low = mc->readChar();
+
+    if (mc->readChar() == 3) {
+      if (crc16(recv, len) == ((unsigned short)crc_high << 8
+          | (unsigned short)crc_low)) {
+        // Packet received!
+        process_packet(recv, len);
+      }
+    }
+  } catch(boost::system::system_error& e) {
+    ss << "Error: " << e.what() << "\n";
+    return -1;
+  }
+  return 0;
+}
+
+void process_packet(const unsigned char *data, int len) {
+  if (!len) {
+    return;
+  }
+
+  uint8_t packet_id;
+  int32_t ind = 0;
+
+  packet_id = data[0];
+  data++;
+  len--;
+
+  switch (packet_id) {
+    case 0: //0 == COMM_GET_VALUES
+      ind = 0;
+      printf("TEMP MOS1: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP MOS2: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP MOS3: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP MOS4: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP MOS5: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP MOS6: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("TEMP PCB: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+
+      printf("Current motor: %f\n", ((double)buffer_get_int32(data, &ind)) / 100.0);
+      printf("Current in: %f\n", ((double)buffer_get_int32(data, &ind)) / 100.0);
+      printf("Duty now: %f\n", ((double)buffer_get_int16(data, &ind)) / 1000.0);
+      printf("RPM: %f\n", ((double)buffer_get_int32(data, &ind)));
+      printf("V in: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      printf("Amp hours: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
+      printf("Amp hours charged: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
+      printf("Watt hours: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
+      printf("Watt hours charged: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
+      printf("Tachometer: %f\n", ((double)buffer_get_int32(data, &ind)));
+      printf("Tachometer abs: %f\n", ((double)buffer_get_int32(data, &ind)));
+      //printf("Fault code: %i\n", data[ind++]);
+      break;
+
+    default:
+      break;
+  }
+
+}
+
+uint32_t get_values() {
+  unsigned char cmd[1] = {0x00};
+  send_packet(cmd, 1);
+  recv_packet();
+  return 0;
+}
+
+
 /*
   No comments.
 */
@@ -222,8 +330,22 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  ros::Subscriber sub = n.subscribe("motor_controller_commands", 1000, callback);
-  ros::spin();
+  ros::Subscriber sub = n.subscribe("motor_controller_commands", 1, callback);
+  ros::Rate loop_rate(1000);
+  
+  int counter = 0;
+  while(ros::ok()) {
+    // Get values once every second
+    if (counter == 1000) {
+      get_values();
+      counter = 0;
+    } else {
+      counter++;
+    }
+    // But process callbacks every loop
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
 
   return 0;
 }
