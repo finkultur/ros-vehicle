@@ -63,23 +63,22 @@ def callback(data, pub):
     
 def init():
     # Publish under topic 'motor_controller_commands'
-    pub = rospy.Publisher('motor_controller_commands', AckermannDrive, queue_size=20)
-    
+    pub = rospy.Publisher('motor_controller_commands', AckermannDrive, queue_size=1)
+
     # Subscribs to 'joy'
     rospy.Subscriber("joy", Joy, callback, pub)
-       
+
 
 # Converts a keypress (between 1.0 and -1.0) to a current in Ampere.
 def speedToCurrent(speed):
   # For convenience, we want a value between 0.0 and 1.0
   speed = -((speed-1)/2)
+  MAX_CURRENT = 6 # Max speed in current
 
   if speed < 0.2:
     current = 0
-  elif speed < 0.3:
-    current = 1.0
   else:
-    current = speed*6
+    current = speed*MAX_CURRENT
 
   return current
  
@@ -91,7 +90,7 @@ def joyAngleToDegree(angle):
 
         
 if __name__ == '__main__':
-    rospy.init_node('joy_listener_talker', anonymous=True)
+    rospy.init_node('joy_listener_talker', anonymous=False)
     init()
     rospy.spin()
 
