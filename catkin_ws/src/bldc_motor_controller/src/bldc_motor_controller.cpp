@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "ackermann_msgs/AckermannDrive.h"
+#include <bldc_motor_controller/BLDCValues.h>
 
 #include <iostream>
 #include <sstream>
@@ -53,6 +54,7 @@ int recv_packet();
 uint32_t get_values();
 
 Serial* mc;
+ros::Publisher bldc_values_pub;
 
 /*
   When a msg is received, we log the msg and set steering angle and speed.
@@ -165,7 +167,7 @@ int set_steering(float angle, float angle_velocity) {
   // The angle we get in is a flow in range[-55, 55]
   /* We do not know why 112 seems to be the standard position,
      but it will keep the wheels in default position. */
-  int16_t position = int16_t(angle)+112;
+  int16_t position = int16_t(angle)+114;
   cmd[2] = position >> 8;
   cmd[3] = position;
 
@@ -278,29 +280,31 @@ void process_packet(const unsigned char *data, int len) {
   data++;
   len--;
 
+  bldc_motor_controller::BLDCValues msg; 
+
   switch (packet_id) {
     case 0: //0 == COMM_GET_VALUES
       ind = 0;
-      printf("TEMP MOS1: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
-      printf("TEMP MOS2: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
-      printf("TEMP MOS3: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
-      printf("TEMP MOS4: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
-      printf("TEMP MOS5: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
-      printf("TEMP MOS6: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
-      printf("TEMP PCB: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
+      msg.TEMP_MOS1 = ((double)buffer_get_int16(data, &ind)) / 10.0; 
+      msg.TEMP_MOS2 = ((double)buffer_get_int16(data, &ind)) / 10.0;
+      msg.TEMP_MOS3 = ((double)buffer_get_int16(data, &ind)) / 10.0;
+      msg.TEMP_MOS4 = ((double)buffer_get_int16(data, &ind)) / 10.0;
+      msg.TEMP_MOS5 = ((double)buffer_get_int16(data, &ind)) / 10.0;
+      msg.TEMP_MOS6 = ((double)buffer_get_int16(data, &ind)) / 10.0;
+      msg.TEMP_PCB = ((double)buffer_get_int16(data, &ind)) / 10.0;
+      msg.current_motor = ((double)buffer_get_int32(data, &ind)) / 100.0;
+      msg.current_in = ((double)buffer_get_int32(data, &ind)) / 100.0;
+      msg.duty_now = ((double)buffer_get_int16(data, &ind)) / 1000.0;
+      msg.rpm = ((double)buffer_get_int32(data, &ind));
+      msg.v_in = ((double)buffer_get_int16(data, &ind)) / 10.0;
+      msg.amp_hours = ((double)buffer_get_int32(data, &ind)) / 10000.0;
+      msg.amp_hours_charged = ((double)buffer_get_int32(data, &ind)) / 10000.0;
+      msg.watt_hours = ((double)buffer_get_int32(data, &ind)) / 10000.0;
+      msg.watt_hours_charged = ((double)buffer_get_int32(data, &ind)) / 10000.0;
+      msg.tachometer = ((double)buffer_get_int32(data, &ind));
+      msg.tachometer_abs = ((double)buffer_get_int32(data, &ind));
 
-      printf("Current motor: %f\n", ((double)buffer_get_int32(data, &ind)) / 100.0);
-      printf("Current in: %f\n", ((double)buffer_get_int32(data, &ind)) / 100.0);
-      printf("Duty now: %f\n", ((double)buffer_get_int16(data, &ind)) / 1000.0);
-      printf("RPM: %f\n", ((double)buffer_get_int32(data, &ind)));
-      printf("V in: %f\n", ((double)buffer_get_int16(data, &ind)) / 10.0);
-      printf("Amp hours: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
-      printf("Amp hours charged: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
-      printf("Watt hours: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
-      printf("Watt hours charged: %f\n", ((double)buffer_get_int32(data, &ind)) / 10000.0);
-      printf("Tachometer: %f\n", ((double)buffer_get_int32(data, &ind)));
-      printf("Tachometer abs: %f\n", ((double)buffer_get_int32(data, &ind)));
-      //printf("Fault code: %i\n", data[ind++]);
+      bldc_values_pub.publish(msg);
       break;
 
     default:
@@ -332,6 +336,8 @@ int main(int argc, char **argv)
 
   ros::Subscriber sub = n.subscribe("motor_controller_commands", 1, callback);
   ros::Rate loop_rate(1000);
+  
+  bldc_values_pub = n.advertise<bldc_motor_controller::BLDCValues>("BLDC_Values", 1000);
   
   int counter = 0;
   while(ros::ok()) {
