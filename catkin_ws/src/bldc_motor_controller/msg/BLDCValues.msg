@@ -1,3 +1,4 @@
+Header header
 int16 TEMP_MOS1
 int16 TEMP_MOS2
 int16 TEMP_MOS3
@@ -16,3 +17,5 @@ int32 watt_hours
 int32 watt_hours_charged
 int32 tachometer
 int32 tachometer_abs
+float32 current_steering_angle
+float32 current_speed

@@ -73,6 +73,7 @@ int set_speed(float speed) {
   printf("Speed command to be sent: %02x, %02x, %02x, %02x, %02x\n",
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
 
+  current_speed = speed_in_mA;
   return send_packet(cmd, len);
 }
 
@@ -121,7 +122,8 @@ int set_steering(float angle, float angle_velocity) {
   cout << "Position to be set: " << position << endl; 
   printf("Servo move command to be sent: %02x, %02x, %02x, %02x, %02x\n",
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
- 
+
+  current_steering_angle = angle;
   return send_packet(cmd, len);
 }
 
@@ -258,6 +260,10 @@ void process_packet(const unsigned char *data, int len) {
       msg.watt_hours_charged = ((double)buffer_get_int32(data, &ind)) / 10000.0;
       msg.tachometer = ((double)buffer_get_int32(data, &ind));
       msg.tachometer_abs = ((double)buffer_get_int32(data, &ind));
+
+      // This data is not from the car
+      msg.current_steering_angle = current_steering_angle;
+      msg.current_speed = current_speed;
 
       bldc_values_pub.publish(msg);
       break;
