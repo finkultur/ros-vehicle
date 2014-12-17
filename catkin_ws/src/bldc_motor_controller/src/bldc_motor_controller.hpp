@@ -48,7 +48,8 @@ int32_t buffer_get_int32(const uint8_t *buffer, int32_t *index);
 void process_packet(const unsigned char *data, int len);
 int send_packet(const unsigned char *data, int len);
 int recv_packet();
-uint32_t get_values();
+void get_values();
+void send_alive();
 
 Serial* mc;
 ros::Publisher bldc_values_pub;

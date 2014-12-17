@@ -268,11 +268,15 @@ void process_packet(const unsigned char *data, int len) {
 
 }
 
-uint32_t get_values() {
+void get_values() {
   unsigned char cmd[1] = {0x00};
   send_packet(cmd, 1);
   recv_packet();
-  return 0;
+}
+
+void send_alive() {
+  uint8_t cmd[1] = {0x12};
+  send_packet(cmd, 1);
 }
 
 
@@ -295,14 +299,17 @@ int main(int argc, char **argv)
   bldc_values_pub = n.advertise<bldc_motor_controller::BLDCValues>("BLDC_Values", 1000);
   
   int counter = 0;
-  while(ros::ok()) {
+  while (ros::ok()) {
     // Get values once every second
-    if (counter == 1000) {
+    if (counter == 0) {
       get_values();
-      counter = 0;
-    } else {
-      counter++;
     }
+    // Send COMM_ALIVE every 50 ms
+    if (counter % 50 == 0) {
+      send_alive();
+    }
+    counter = (counter+1)%1000;
+
     // But process callbacks every loop
     ros::spinOnce();
     loop_rate.sleep();
