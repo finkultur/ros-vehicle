@@ -42,7 +42,7 @@ from ackermann_msgs.msg import AckermannDrive
 ## axes[0] left stick left/right
 ## buttons[1] B?
 def callback(data, pub):
-    rospy.loginfo(rospy.get_name() + "I heard this: \n")
+    rospy.loginfo(rospy.get_name() + "I heard this: \n buttons[1]==%f, axes[0]==%f, axes[4]==%f", data.buttons[1], data.axes[0], data.axes[4]);
   
     if data.buttons[1] == 0: direction = 1
     else: direction = -1
@@ -71,6 +71,10 @@ def init():
 
 # Converts a keypress (between 1.0 and -1.0) to a current in Ampere.
 def speedToCurrent(speed):
+  # Sometimes joy_node says that axis[4] is 0 (even though it should be 1.0
+  # when not pressed)
+  if speed == 0: return 0;
+
   # For convenience, we want a value between 0.0 and 1.0
   speed = -((speed-1)/2)
   MAX_CURRENT = 6 # Max speed in current
