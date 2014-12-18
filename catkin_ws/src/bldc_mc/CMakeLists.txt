@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(read_srf_data)
+project(bldc_mc)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  ackermann_msgs
   roscpp
   rospy
   std_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -44,11 +46,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
+add_message_files(
+  FILES
+  BLDCValues.msg
 #   Message2.msg
-# )
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -65,10 +67,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+   DEPENDENCIES
+   ackermann_msgs   std_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -81,8 +83,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES read_srf_data
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  LIBRARIES bldc_mc
+  CATKIN_DEPENDS ackermann_msgs roscpp rospy std_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -98,23 +100,19 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(read_srf_data
-#   src/${PROJECT_NAME}/read_srf_data.cpp
+# add_library(bldc_mc
+#   src/${PROJECT_NAME}/bldc_mc.cpp
 # )
 
 ## Declare a cpp executable
-add_executable(read_srf_data_listener src/read_srf_data_listener.cpp)
-add_executable(read_srf_data_talker src/read_srf_data_talker.cpp)
+add_executable(bldc_mc src/bldc_mc.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(read_srf_data_node read_srf_data_generate_messages_cpp)
+# add_dependencies(bldc_mc_node bldc_mc_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(read_srf_data_listener
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(read_srf_data_talker
+target_link_libraries(bldc_mc
   ${catkin_LIBRARIES}
 )
 
@@ -133,7 +131,7 @@ target_link_libraries(read_srf_data_talker
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS read_srf_data read_srf_data_node
+# install(TARGETS bldc_mc bldc_mc_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -158,7 +156,7 @@ target_link_libraries(read_srf_data_talker
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_read_srf_data.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_bldc_mc.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

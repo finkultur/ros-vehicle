@@ -38,7 +38,7 @@
 
 import rospy, serial
 from std_msgs.msg import String
-from read_imu_data.msg import IMUData
+from get_imu.msg import IMUData
 
 def talker():
     ser = serial.Serial('/dev/ttyACM0')

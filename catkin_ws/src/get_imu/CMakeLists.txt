@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(bldc_motor_controller)
+project(get_imu)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  ackermann_msgs
   roscpp
   rospy
   std_msgs
@@ -47,8 +46,9 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 add_message_files(
-  FILES
-  BLDCValues.msg
+   FILES
+   IMUData.msg
+#   Message1.msg
 #   Message2.msg
 )
 
@@ -69,7 +69,7 @@ add_message_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
    DEPENDENCIES
-   ackermann_msgs   std_msgs
+   std_msgs
 )
 
 ###################################
@@ -83,8 +83,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES bldc_motor_controller
-  CATKIN_DEPENDS ackermann_msgs roscpp rospy std_msgs message_runtime
+#  LIBRARIES get_imu
+  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -100,21 +100,21 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(bldc_motor_controller
-#   src/${PROJECT_NAME}/bldc_motor_controller.cpp
+# add_library(get_imu
+#   src/${PROJECT_NAME}/get_imu.cpp
 # )
 
 ## Declare a cpp executable
-add_executable(bldc_motor_controller src/bldc_motor_controller.cpp)
+# add_executable(get_imu_node src/get_imu_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(bldc_motor_controller_node bldc_motor_controller_generate_messages_cpp)
+# add_dependencies(get_imu_node get_imu_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(bldc_motor_controller
-  ${catkin_LIBRARIES}
-)
+# target_link_libraries(get_imu_node
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
@@ -131,7 +131,7 @@ target_link_libraries(bldc_motor_controller
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS bldc_motor_controller bldc_motor_controller_node
+# install(TARGETS get_imu get_imu_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -156,7 +156,7 @@ target_link_libraries(bldc_motor_controller
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_bldc_motor_controller.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_get_imu.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

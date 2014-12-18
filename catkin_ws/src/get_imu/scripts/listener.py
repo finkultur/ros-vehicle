@@ -37,7 +37,7 @@
 
 import rospy
 from std_msgs.msg import String
-from read_imu_data.msg import IMUData
+from get_imu.msg import IMUData
 
 def callback(data):
     rospy.loginfo(rospy.get_name() + 

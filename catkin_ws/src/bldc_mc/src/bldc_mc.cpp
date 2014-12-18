@@ -1,4 +1,4 @@
-#include "bldc_motor_controller.hpp"
+#include "bldc_mc.hpp"
 
 using namespace std;
 using namespace boost;
@@ -256,7 +256,7 @@ void process_packet(const unsigned char *data, int len) {
   data++;
   len--;
 
-  bldc_motor_controller::BLDCValues msg; 
+  bldc_mc::BLDCValues msg; 
 
   switch (packet_id) {
     case 0: //0 == COMM_GET_VALUES
@@ -330,7 +330,7 @@ int main(int argc, char **argv)
                              boost::bind(callback_uss, _1, "SRF08_sensor_1"));
 
   ros::Rate loop_rate(1000);
-  bldc_values_pub = n.advertise<bldc_motor_controller::BLDCValues>("BLDC_Values", 1000);
+  bldc_values_pub = n.advertise<bldc_mc::BLDCValues>("BLDC_Values", 1000);
   
   int counter = 0;
   while (ros::ok()) {
