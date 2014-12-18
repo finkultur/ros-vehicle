@@ -87,9 +87,13 @@ def speedToCurrent(speed):
   return current
  
  
-# Converts from joystick angle to steering angle
+# Converts from joystick angle to steering angle.
+# joy_node outputs angle in -1.0 (full left) to 1.0 (full right)
+# The angle are "not really" in degrees.
+# +-70 (assuming middle is 114) is the last value that don't give that weird
+# noice.
 def joyAngleToDegree(angle):
-    degree = 59*angle
+    degree = 70*angle
     return degree
 
         
