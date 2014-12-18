@@ -78,11 +78,11 @@ int set_speed(float speed) {
   uint8_t cmd[len] = {0x02, 0x00, 0x00, 0x00, 0x00};
   int32_t speed_in_mA = -int(1000*speed);
 
-  if (emergency) {
+  // If something is in front of the vehicle, only allow reverse
+  if (emergency && speed > 0) {
     speed_in_mA = 0;
   }
 
-  //memcpy(&cmd[1], &speed_in_mA, sizeof(uint32_t));  
   cmd[1] = speed_in_mA >> 24;
   cmd[2] = speed_in_mA >> 16;
   cmd[3] = speed_in_mA >> 8;
