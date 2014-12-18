@@ -1,4 +1,4 @@
-#include "bldc_motor_controller.hpp"
+#include "bldc_mc.hpp"
 
 using namespace std;
 using namespace boost;
@@ -15,9 +15,9 @@ void callback(const ackermann_msgs::AckermannDrive::ConstPtr& msg) {
 
 void callback_uss(const sensor_msgs::Range::ConstPtr& msg, 
                   const string& sensor_name) {
-  if (sensor_name == "SRF08_sensor_0") {
+  if (sensor_name == "us_sensor0") {
     us_sensor0 = msg->range;
-  } else if (sensor_name == "SRF08_sensor_1") {
+  } else if (sensor_name == "us_sensor1") {
     us_sensor1 = msg->range;
   }
 
@@ -256,7 +256,7 @@ void process_packet(const unsigned char *data, int len) {
   data++;
   len--;
 
-  bldc_motor_controller::BLDCValues msg; 
+  bldc_mc::MCValues msg; 
 
   switch (packet_id) {
     case 0: //0 == COMM_GET_VALUES
@@ -322,15 +322,15 @@ int main(int argc, char **argv)
   us_sensor0 = 0;
   us_sensor1 = 0;
 
-  ros::Subscriber sub_mc_cmd = n.subscribe("motor_controller_commands", 1, callback);
+  ros::Subscriber sub_mc_cmd = n.subscribe("mc_cmds", 1, callback);
   // We pass the topic name to the US-sensor callback function
-  ros::Subscriber sub_uss0 = n.subscribe<sensor_msgs::Range>("SRF08_sensor_0", 1, 
-                             boost::bind(callback_uss, _1, "SRF08_sensor_0"));
-  ros::Subscriber sub_uss1 = n.subscribe<sensor_msgs::Range>("SRF08_sensor_1", 1, 
-                             boost::bind(callback_uss, _1, "SRF08_sensor_1"));
+  ros::Subscriber sub_uss0 = n.subscribe<sensor_msgs::Range>("us_sensor0", 1, 
+                             boost::bind(callback_uss, _1, "us_sensor0"));
+  ros::Subscriber sub_uss1 = n.subscribe<sensor_msgs::Range>("us_sensor1", 1, 
+                             boost::bind(callback_uss, _1, "us_sensor1"));
 
   ros::Rate loop_rate(1000);
-  bldc_values_pub = n.advertise<bldc_motor_controller::BLDCValues>("BLDC_Values", 1000);
+  bldc_values_pub = n.advertise<bldc_mc::MCValues>("mc_values", 1000);
   
   int counter = 0;
   while (ros::ok()) {

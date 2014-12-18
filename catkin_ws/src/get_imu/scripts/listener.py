@@ -33,68 +33,32 @@
 #
 # Revision $Id$
 
+## Listens to the topic 'imu_data' and prints the data.
+
 import rospy
 from std_msgs.msg import String
-from sensor_msgs.msg import Joy
-from ackermann_msgs.msg import AckermannDrive
+from get_imu.msg import IMUData
 
-## axes[4] right trigger
-## axes[0] left stick left/right
-## buttons[1] B?
-def callback(data, pub):
-    rospy.loginfo(rospy.get_name() + "I heard this: \n buttons[1]==%f, axes[0]==%f, axes[4]==%f", data.buttons[1], data.axes[0], data.axes[4]);
-  
-    if data.buttons[1] == 0: direction = 1
-    else: direction = -1
-    degree = joyAngleToDegree(data.axes[0])
-    current = speedToCurrent(data.axes[4])*direction
+def callback(data):
+    rospy.loginfo(rospy.get_name() + 
+      " I heard this:\n" +
+      "Gyro: %f, %f, %f\nAcc: %f, %f, %f\nMag: %f, %f, %f\n" %
+      (data.gyro0, data.gyro1, data.gyro2,
+      data.acc0, data.acc1, data.acc2,
+      data.mag0, data.mag1, data.mag2))
     
-    rospy.loginfo("Setting degree to %f\n", degree)
-    rospy.loginfo("Setting current to %f\n", current)
+def listener():
+    # in ROS, nodes are unique named. If two nodes with the same
+    # node are launched, the previous one is kicked off. The 
+    # anonymous=True flag means that rospy will choose a unique
+    # name for our 'talker' node so that multiple talkers can
+    # run simultaenously.
+    rospy.init_node('imu_listener', anonymous=True)
 
-    # Create AckermannDrive msg
-    drive = AckermannDrive()
-    drive.steering_angle = degree
-    drive.speed = current
-    
-    # Publish under topic 'motor_controller_commands'
-    pub.publish(drive)
- 
-    
-def init():
-    # Publish under topic 'motor_controller_commands'
-    pub = rospy.Publisher('motor_controller_commands', AckermannDrive, queue_size=1)
+    rospy.Subscriber("imu_data", IMUData, callback)
 
-    # Subscribs to 'joy'
-    rospy.Subscriber("joy", Joy, callback, pub)
-
-
-# Converts a keypress (between 1.0 and -1.0) to a current in Ampere.
-def speedToCurrent(speed):
-  # Sometimes joy_node says that axis[4] is 0 (even though it should be 1.0
-  # when not pressed)
-  if speed == 0: return 0;
-
-  # For convenience, we want a value between 0.0 and 1.0
-  speed = -((speed-1)/2)
-  MAX_CURRENT = 6 # Max speed in current
-
-  if speed < 0.2:
-    current = 0
-  else:
-    current = speed*MAX_CURRENT
-
-  return current
- 
- 
-# Converts from joystick angle to steering angle
-def joyAngleToDegree(angle):
-    degree = 59*angle
-    return degree
-
+    # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()
         
 if __name__ == '__main__':
-    rospy.init_node('joy_listener_talker', anonymous=False)
-    init()
-    rospy.spin()
-
+    listener()

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(bldc_motor_controller)
+project(bldc_mc)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -48,7 +48,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  BLDCValues.msg
+  MCValues.msg
 #   Message2.msg
 )
 
@@ -83,7 +83,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES bldc_motor_controller
+#  LIBRARIES bldc_mc
   CATKIN_DEPENDS ackermann_msgs roscpp rospy std_msgs message_runtime
 #  DEPENDS system_lib
 )
@@ -100,19 +100,19 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(bldc_motor_controller
-#   src/${PROJECT_NAME}/bldc_motor_controller.cpp
+# add_library(bldc_mc
+#   src/${PROJECT_NAME}/bldc_mc.cpp
 # )
 
 ## Declare a cpp executable
-add_executable(bldc_motor_controller src/bldc_motor_controller.cpp)
+add_executable(bldc_mc src/bldc_mc.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(bldc_motor_controller_node bldc_motor_controller_generate_messages_cpp)
+# add_dependencies(bldc_mc_node bldc_mc_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(bldc_motor_controller
+target_link_libraries(bldc_mc
   ${catkin_LIBRARIES}
 )
 
@@ -131,7 +131,7 @@ target_link_libraries(bldc_motor_controller
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS bldc_motor_controller bldc_motor_controller_node
+# install(TARGETS bldc_mc bldc_mc_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -156,7 +156,7 @@ target_link_libraries(bldc_motor_controller
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_bldc_motor_controller.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_bldc_mc.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

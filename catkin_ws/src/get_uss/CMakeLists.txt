@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(read_srf_data)
+project(get_uss)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -81,7 +81,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES read_srf_data
+#  LIBRARIES get_uss
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -98,23 +98,23 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(read_srf_data
-#   src/${PROJECT_NAME}/read_srf_data.cpp
+# add_library(get_uss
+#   src/${PROJECT_NAME}/get_uss.cpp
 # )
 
 ## Declare a cpp executable
-add_executable(read_srf_data_listener src/read_srf_data_listener.cpp)
-add_executable(read_srf_data_talker src/read_srf_data_talker.cpp)
+add_executable(listener src/listener.cpp)
+add_executable(talker src/talker.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(read_srf_data_node read_srf_data_generate_messages_cpp)
+# add_dependencies(get_uss_node get_uss_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(read_srf_data_listener
+target_link_libraries(listener
   ${catkin_LIBRARIES}
 )
-target_link_libraries(read_srf_data_talker
+target_link_libraries(talker
   ${catkin_LIBRARIES}
 )
 
@@ -133,7 +133,7 @@ target_link_libraries(read_srf_data_talker
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS read_srf_data read_srf_data_node
+# install(TARGETS get_uss get_uss_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -158,7 +158,7 @@ target_link_libraries(read_srf_data_talker
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_read_srf_data.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_get_uss.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

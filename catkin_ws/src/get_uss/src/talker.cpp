@@ -56,8 +56,8 @@ int main(int argc, char **argv)
 	msg_sensor_0.radiation_type = msg_sensor_0.ULTRASOUND;
 	msg_sensor_1.radiation_type = msg_sensor_1.ULTRASOUND;
 
-	ros::Publisher SRF08_sensor_0 = n.advertise<sensor_msgs::Range>("SRF08_sensor_0", 1000);
-	ros::Publisher SRF08_sensor_1 = n.advertise<sensor_msgs::Range>("SRF08_sensor_1", 1000);
+	ros::Publisher us_sensor0 = n.advertise<sensor_msgs::Range>("us_sensor0", 1000);
+	ros::Publisher us_sensor1 = n.advertise<sensor_msgs::Range>("us_sensor1", 1000);
 	
 	try {
 		sensor_0 = new Serial("/dev/ttyUSB0", 19200);
@@ -80,8 +80,8 @@ int main(int argc, char **argv)
 		msg_sensor_1.range = get_reading(sensor_1, 0xE6)/100.0;
 		//msg_sensor_1.range = (float)10; 
 
-		SRF08_sensor_0.publish(msg_sensor_0);
-		SRF08_sensor_1.publish(msg_sensor_1);
+		us_sensor0.publish(msg_sensor_0);
+		us_sensor1.publish(msg_sensor_1);
 
 		ros::spinOnce();
 		loop_rate.sleep();

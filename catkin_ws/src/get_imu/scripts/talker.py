@@ -33,32 +33,55 @@
 #
 # Revision $Id$
 
-## Listens to the topic 'imu_data' and prints the data.
+## Reads data from the STM32F3-Discover board and publishes that data to the
+## 'imu_data' topic. Code based on various ROS-tutorials.
 
-import rospy
+import rospy, serial
 from std_msgs.msg import String
-from read_imu_data.msg import IMUData
+from get_imu.msg import IMUData
 
-def callback(data):
-    rospy.loginfo(rospy.get_name() + 
-      " I heard this:\n" +
-      "Gyro: %f, %f, %f\nAcc: %f, %f, %f\nMag: %f, %f, %f\n" %
-      (data.gyro0, data.gyro1, data.gyro2,
-      data.acc0, data.acc1, data.acc2,
-      data.mag0, data.mag1, data.mag2))
-    
-def listener():
-    # in ROS, nodes are unique named. If two nodes with the same
-    # node are launched, the previous one is kicked off. The 
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'talker' node so that multiple talkers can
-    # run simultaenously.
-    rospy.init_node('imu_listener', anonymous=True)
+def talker():
+    ser = serial.Serial('/dev/ttyACM0')
 
-    rospy.Subscriber("imu_data", IMUData, callback)
+    pub = rospy.Publisher('imu_data', IMUData, queue_size=10)
+    rospy.init_node('imu_talker', anonymous=True)
+    r = rospy.Rate(1) # 1Hz
+    while not rospy.is_shutdown():
+      ser.write('r')
+      ser.flush()
+      #str = "Time is %s\n"%rospy.get_time()
 
-    # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
+      data = ser.readline()
+      msg = parseIMUData(data) 
+
+      rospy.loginfo(msg)
+      pub.publish(msg)
+      r.sleep()
+
+
+# Parses data from the IMU that is on the form
+# "float,float,float:float,float,float:float,float,float".
+# Creates and returns a IMUData-message
+def parseIMUData(indata):
+  data = indata.split(':')
+  gyro = data[0].split(',')
+  acc = data[1].split(',')
+  mag = data[2].split(',')
+
+  msg = IMUData()
+  msg.gyro0 = float(gyro[0])
+  msg.gyro1 = float(gyro[1])
+  msg.gyro2 = float(gyro[2])
+  msg.acc0 = float(acc[0])
+  msg.acc1 = float(acc[1])
+  msg.acc2 = float(acc[2])
+  msg.mag0 = float(mag[0])
+  msg.mag1 = float(mag[1])
+  msg.mag2 = float(mag[2])
+  return msg
+   
         
 if __name__ == '__main__':
-    listener()
+    try:
+        talker()
+    except rospy.ROSInterruptException: pass

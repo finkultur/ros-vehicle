@@ -33,55 +33,68 @@
 #
 # Revision $Id$
 
-## Reads data from the STM32F3-Discover board and publishes that data to the
-## 'imu_data' topic. Code based on various ROS-tutorials.
-
-import rospy, serial
+import rospy
 from std_msgs.msg import String
-from read_imu_data.msg import IMUData
+from sensor_msgs.msg import Joy
+from ackermann_msgs.msg import AckermannDrive
 
-def talker():
-    ser = serial.Serial('/dev/ttyACM0')
+## axes[4] right trigger
+## axes[0] left stick left/right
+## buttons[1] B?
+def callback(data, pub):
+    rospy.loginfo(rospy.get_name() + "I heard this: \n buttons[1]==%f, axes[0]==%f, axes[4]==%f", data.buttons[1], data.axes[0], data.axes[4]);
+  
+    if data.buttons[1] == 0: direction = 1
+    else: direction = -1
+    degree = joyAngleToDegree(data.axes[0])
+    current = speedToCurrent(data.axes[4])*direction
+    
+    rospy.loginfo("Setting degree to %f\n", degree)
+    rospy.loginfo("Setting current to %f\n", current)
 
-    pub = rospy.Publisher('imu_data', IMUData, queue_size=10)
-    rospy.init_node('imu_talker', anonymous=True)
-    r = rospy.Rate(1) # 1Hz
-    while not rospy.is_shutdown():
-      ser.write('r')
-      ser.flush()
-      #str = "Time is %s\n"%rospy.get_time()
+    # Create AckermannDrive msg
+    drive = AckermannDrive()
+    drive.steering_angle = degree
+    drive.speed = current
+    
+    # Publish under topic 'mc_cmds'
+    pub.publish(drive)
+ 
+    
+def init():
+    # Publish under topic 'mc_cmds'
+    pub = rospy.Publisher('mc_cmds', AckermannDrive, queue_size=1)
 
-      data = ser.readline()
-      msg = parseIMUData(data) 
-
-      rospy.loginfo(msg)
-      pub.publish(msg)
-      r.sleep()
+    # Subscribs to 'joy'
+    rospy.Subscriber("joy", Joy, callback, pub)
 
 
-# Parses data from the IMU that is on the form
-# "float,float,float:float,float,float:float,float,float".
-# Creates and returns a IMUData-message
-def parseIMUData(indata):
-  data = indata.split(':')
-  gyro = data[0].split(',')
-  acc = data[1].split(',')
-  mag = data[2].split(',')
+# Converts a keypress (between 1.0 and -1.0) to a current in Ampere.
+def speedToCurrent(speed):
+  # Sometimes joy_node says that axis[4] is 0 (even though it should be 1.0
+  # when not pressed)
+  if speed == 0: return 0;
 
-  msg = IMUData()
-  msg.gyro0 = float(gyro[0])
-  msg.gyro1 = float(gyro[1])
-  msg.gyro2 = float(gyro[2])
-  msg.acc0 = float(acc[0])
-  msg.acc1 = float(acc[1])
-  msg.acc2 = float(acc[2])
-  msg.mag0 = float(mag[0])
-  msg.mag1 = float(mag[1])
-  msg.mag2 = float(mag[2])
-  return msg
-   
+  # For convenience, we want a value between 0.0 and 1.0
+  speed = -((speed-1)/2)
+  MAX_CURRENT = 6 # Max speed in current
+
+  if speed < 0.2:
+    current = 0
+  else:
+    current = speed*MAX_CURRENT
+
+  return current
+ 
+ 
+# Converts from joystick angle to steering angle
+def joyAngleToDegree(angle):
+    degree = 59*angle
+    return degree
+
         
 if __name__ == '__main__':
-    try:
-        talker()
-    except rospy.ROSInterruptException: pass
+    rospy.init_node('joy_listener_talker', anonymous=False)
+    init()
+    rospy.spin()
+
