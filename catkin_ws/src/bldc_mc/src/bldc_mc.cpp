@@ -283,8 +283,8 @@ void process_packet(const unsigned char *data, int len) {
       // This data is not from the car
       msg.current_steering_angle = current_steering_angle;
       msg.current_speed = current_speed;
-
-      bldc_values_pub.publish(msg);
+      ROS_INFO("Publishing MCValues!\n");
+      mc_values_pub.publish(msg);
       break;
 
     default:
@@ -330,12 +330,12 @@ int main(int argc, char **argv)
                              boost::bind(callback_uss, _1, "us_sensor1"));
 
   ros::Rate loop_rate(1000);
-  bldc_values_pub = n.advertise<bldc_mc::MCValues>("mc_values", 1000);
+  mc_values_pub = n.advertise<bldc_mc::MCValues>("mc_values", 1000);
   
   int counter = 0;
   while (ros::ok()) {
-    // Get values once every second
-    if (counter = 0) {
+    // Get values every 200ms
+    if (counter % 200 == 0) {
       get_values();
     }
     // Send COMM_ALIVE every 50 ms

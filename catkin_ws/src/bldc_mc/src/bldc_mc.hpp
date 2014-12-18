@@ -54,7 +54,7 @@ void get_values();
 void send_alive();
 
 Serial* mc;
-ros::Publisher bldc_values_pub;
+ros::Publisher mc_values_pub;
 
 float current_steering_angle;
 float current_speed;
