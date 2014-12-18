@@ -57,13 +57,13 @@ def callback(data, pub):
     drive.steering_angle = degree
     drive.speed = current
     
-    # Publish under topic 'motor_controller_commands'
+    # Publish under topic 'mc_cmds'
     pub.publish(drive)
  
     
 def init():
-    # Publish under topic 'motor_controller_commands'
-    pub = rospy.Publisher('motor_controller_commands', AckermannDrive, queue_size=1)
+    # Publish under topic 'mc_cmds'
+    pub = rospy.Publisher('mc_cmds', AckermannDrive, queue_size=1)
 
     # Subscribs to 'joy'
     rospy.Subscriber("joy", Joy, callback, pub)

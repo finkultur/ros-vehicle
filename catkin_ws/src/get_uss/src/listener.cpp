@@ -50,8 +50,8 @@ int main(int argc, char **argv)
    * is the number of messages that will be buffered up before beginning to throw
    * away the oldest ones.
    */
-  ros::Subscriber sub = n.subscribe("SRF08_sensor_0", 1000, chatterCallback);
-  ros::Subscriber sub2 = n.subscribe("SRF08_sensor_1", 1000, chatterCallback2);
+  ros::Subscriber sub = n.subscribe("us_sensor0", 1000, chatterCallback);
+  ros::Subscriber sub2 = n.subscribe("us_sensor1", 1000, chatterCallback2);
 
   /**
    * ros::spin() will enter a loop, pumping callbacks.  With this version, all
