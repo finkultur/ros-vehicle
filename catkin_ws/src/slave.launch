@@ -2,6 +2,6 @@
   <node pkg="joy" type="joy_node" name="joystick_publisher">
     <param name="dev" value="/dev/input/js1" />
     <!-- Sets the autorepeat rate to 100 Hz -->
-    <param name="autorepeat_rate" value="100" />
+    <!-- <param name="autorepeat_rate" value="100" /> -->
   </node>
 </launch>
