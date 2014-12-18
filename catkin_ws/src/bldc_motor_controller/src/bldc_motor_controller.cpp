@@ -13,13 +13,28 @@ void callback(const ackermann_msgs::AckermannDrive::ConstPtr& msg) {
   set_steering(msg->steering_angle, msg->steering_angle_velocity);
 }
 
+void callback_uss(const sensor_msgs::Range::ConstPtr& msg, 
+                  const string& sensor_name) {
+  if (sensor_name == "SRF08_sensor_0") {
+    us_sensor0 = msg->range;
+  } else if (sensor_name == "SRF08_sensor_1") {
+    us_sensor1 = msg->range;
+  }
+
+  if (us_sensor0 < 0.3 || us_sensor1 < 0.3) {
+    emergency = true;
+  } else {
+    emergency = false;
+  }
+} 
+
 /*
   Initializes the motor controller.
-  Just opens the serial port.
+  Opens the serial port.
 */
 int init_mc() {
   std::stringstream ss;
-  
+ 
   try {
     mc = new Serial("/dev/ttyACM0", 115200);
   } catch(boost::system::system_error e) {
@@ -62,6 +77,10 @@ int set_speed(float speed) {
   const int len = 5; // Speed commands are 5 bytes long
   uint8_t cmd[len] = {0x02, 0x00, 0x00, 0x00, 0x00};
   int32_t speed_in_mA = -int(1000*speed);
+
+  if (emergency) {
+    speed_in_mA = 0;
+  }
 
   //memcpy(&cmd[1], &speed_in_mA, sizeof(uint32_t));  
   cmd[1] = speed_in_mA >> 24;
@@ -299,15 +318,24 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  ros::Subscriber sub = n.subscribe("motor_controller_commands", 1, callback);
+  emergency = false;
+  us_sensor0 = 0;
+  us_sensor1 = 0;
+
+  ros::Subscriber sub_mc_cmd = n.subscribe("motor_controller_commands", 1, callback);
+  // We pass the topic name to the US-sensor callback function
+  ros::Subscriber sub_uss0 = n.subscribe<sensor_msgs::Range>("SRF08_sensor_0", 1, 
+                             boost::bind(callback_uss, _1, "SRF08_sensor_0"));
+  ros::Subscriber sub_uss1 = n.subscribe<sensor_msgs::Range>("SRF08_sensor_1", 1, 
+                             boost::bind(callback_uss, _1, "SRF08_sensor_1"));
+
   ros::Rate loop_rate(1000);
-  
   bldc_values_pub = n.advertise<bldc_motor_controller::BLDCValues>("BLDC_Values", 1000);
   
   int counter = 0;
   while (ros::ok()) {
     // Get values once every second
-    if (counter == 0) {
+    if (counter = 0) {
       get_values();
     }
     // Send COMM_ALIVE every 50 ms

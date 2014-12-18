@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include "sensor_msgs/Range.h"
 #include "ackermann_msgs/AckermannDrive.h"
 #include <bldc_motor_controller/BLDCValues.h>
 
@@ -39,6 +40,7 @@ const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
   0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0 };
 }
 
+void callback_uss(const sensor_msgs::Range::ConstPtr& msg, const std::string &sensor_name);
 int init_mc();
 int set_speed(float speed);
 int set_steering(float angle, float angle_velocity);
@@ -56,3 +58,6 @@ ros::Publisher bldc_values_pub;
 
 float current_steering_angle;
 float current_speed;
+float us_sensor0;
+float us_sensor1;
+bool emergency;
