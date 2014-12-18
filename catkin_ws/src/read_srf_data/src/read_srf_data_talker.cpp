@@ -61,21 +61,24 @@ int main(int argc, char **argv)
 	
 	try {
 		sensor_0 = new Serial("/dev/ttyUSB0", 19200);
+	} catch(boost::system::system_error& e) {
+		std::stringstream ss;
+		ss << "Error, can not open /dev/ttyUSB0!\n" << "Error msg: " << e.what();
+		ROS_INFO("%s", ss.str().c_str());
+	}
+	try {
 		sensor_1 = new Serial("/dev/ttyUSB1", 19200);	
 	} catch(boost::system::system_error& e) {
 		std::stringstream ss;
-		ss << "Error, cant open Serial USB!\n" << "Error msg: " << e.what();
+		ss << "Error, can not open /dev/ttyUSB1!\n" << "Error msg: " << e.what();
 		ROS_INFO("%s", ss.str().c_str());
 	} 
 
 	while (ros::ok()) {
     // These values are divided by 100 to get the range in meters
-		msg_sensor_0.range = get_reading(sensor_0, 0xE2)/100.0;
-		msg_sensor_1.range = get_reading(sensor_1, 0xE4)/100.0;
+		msg_sensor_0.range = get_reading(sensor_0, 0xE4)/100.0;
+		msg_sensor_1.range = get_reading(sensor_1, 0xE6)/100.0;
 		//msg_sensor_1.range = (float)10; 
-
-		//std::cout << "Distance_0: " << msg_sensor_0.range << "\n";
-		//std::cout << "Distance_1: " << msg_sensor_1.range << "\n";
 
 		SRF08_sensor_0.publish(msg_sensor_0);
 		SRF08_sensor_1.publish(msg_sensor_1);
