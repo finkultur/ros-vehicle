@@ -44,6 +44,8 @@ void callback_uss(const sensor_msgs::Range::ConstPtr& msg, const std::string &se
 int init_mc();
 int set_speed(float speed);
 int set_steering(float angle, float angle_velocity);
+int current_brake(int32_t current_in_mA);
+int set_duty(int32_t duty);
 unsigned short crc16(const unsigned char *buf, unsigned int len);
 int16_t buffer_get_int16(const uint8_t *buffer, int32_t *index);
 int32_t buffer_get_int32(const uint8_t *buffer, int32_t *index);

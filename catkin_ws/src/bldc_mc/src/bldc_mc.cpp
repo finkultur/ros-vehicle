@@ -21,9 +21,11 @@ void callback_uss(const sensor_msgs::Range::ConstPtr& msg,
     us_sensor1 = msg->range;
   }
 
-  if (us_sensor0 < 0.3 || us_sensor1 < 0.3) {
+  if (!emergency && (us_sensor0 < 0.7 || us_sensor1 < 0.7)) {
     emergency = true;
-  } else {
+    current_brake(6000);
+    set_speed(0);
+  } else if (emergency && (us_sensor0 >= 0.7 && us_sensor1 >= 0.7)) {
     emergency = false;
   }
 } 
@@ -143,6 +145,44 @@ int set_steering(float angle, float angle_velocity) {
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
 
   current_steering_angle = angle;
+  return send_packet(cmd, len);
+}
+
+int current_brake(int32_t brake_current) {
+  const int len = 5; // cmd is 5 bytes long
+  /*
+  cmd[0]: what command (0x03 == COMM_SET_CURRENT_BRAKE
+  cmd[1-4]: current in mA
+  */
+  uint8_t cmd[len] = {0x03, 0x00, 0x00, 0x00, 0x00};
+  cmd[1] = brake_current >> 24;
+  cmd[2] = brake_current >> 16;
+  cmd[3] = brake_current >> 8;
+  cmd[4] = brake_current;
+
+  cout << "Brake current to be set: " << brake_current << "mA" << endl; 
+  printf("Servo move command to be sent: %02x, %02x, %02x, %02x, %02x\n",
+          cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
+
+  return send_packet(cmd, len);
+}
+
+int set_duty(int32_t duty) {
+  const int len = 5; // cmd is 5 bytes long
+  /*
+  cmd[0]: what command (0x01 == COMM_SET_DUTY
+  cmd[1-4]: duty in ?
+  */
+  uint8_t cmd[len] = {0x03, 0x00, 0x00, 0x00, 0x00};
+  cmd[1] = duty >> 24;
+  cmd[2] = duty >> 16;
+  cmd[3] = duty >> 8;
+  cmd[4] = duty;
+
+  cout << "Duty to be set: " << duty << endl; 
+  printf("Duty command to be sent: %02x, %02x, %02x, %02x, %02x\n",
+          cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
+
   return send_packet(cmd, len);
 }
 
