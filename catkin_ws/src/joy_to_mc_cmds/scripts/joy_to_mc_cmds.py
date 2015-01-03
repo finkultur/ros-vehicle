@@ -46,7 +46,7 @@ def callback(data, pub):
   
     if data.buttons[1] == 0: direction = 1
     else: direction = -1
-    degree = joyAngleToDegree(data.axes[0])
+    degree = data.axes[0]*45
     current = speedToCurrent(data.axes[4])*direction
     
     rospy.loginfo("Setting degree to %f\n", degree)
@@ -92,9 +92,9 @@ def speedToCurrent(speed):
 # The angle are "not really" in degrees.
 # +-70 (assuming middle is 114) is the last value that don't give that weird
 # noice.
-def joyAngleToDegree(angle):
-    degree = 70*angle
-    return degree
+#def joyAngleToDegree(angle):
+#    degree = 70*angle
+#    return degree
 
         
 if __name__ == '__main__':

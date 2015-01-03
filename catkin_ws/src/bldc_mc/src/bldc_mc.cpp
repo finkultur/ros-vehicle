@@ -113,26 +113,6 @@ int set_speed(float speed) {
 }
 
 /*
-  Sends a steering command to the motor controller,
-  which sets the servo offset. Unfortunately we seem to only be able to turn 
-  left by doing this. 
-*/
-/*
-int set_steering(float angle, float angle_velocity) {
-  const int len = 2;
-  uint8_t cmd[len] = {0x06, 0x00};
-  uint8_t offset = uint8_t(angle);
-  cmd[1] = offset;
-
-  cout << "Angle to be set: " 
-       << int(offset) << " in some unit" << endl; 
-  printf("Angle Command to be sent: %02x, %02x\n", cmd[0], cmd[1]);
-  
-  return send_packet(cmd, len);
-}
-*/
-
-/*
   Sends a steering command to the motor controller, which in turn calls the
   function servo_move().
   TODO: Figure out the units of the parameters.
@@ -147,10 +127,11 @@ int set_steering(float angle, float angle_velocity) {
   */
   uint8_t cmd[len] = {0x15, 0x00, 0x00, 0x00, 0x00};
 
-  // The angle we get in is a flow in range[-55, 55]
-  /* We do not know why 112 seems to be the standard position,
-     but it will keep the wheels in default position. */
-  int16_t position = int16_t(angle)+114;
+  /* The angle we get in is a float in range[-45, 45]
+     We do not know why 114 seems to be the standard position,
+     but it will keep the wheels in (almost) default position. 
+     The motor controller wants a number between [114-70, 114+70] */
+  int16_t position = int16_t(angle*70/45+114);
   cmd[2] = position >> 8;
   cmd[3] = position;
 
