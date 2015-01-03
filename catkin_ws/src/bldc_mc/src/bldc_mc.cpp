@@ -23,8 +23,8 @@ void callback_uss(const sensor_msgs::Range::ConstPtr& msg,
 
   if (!emergency && (us_sensor0 < 0.7 || us_sensor1 < 0.7)) {
     emergency = true;
-    current_brake(6000);
     set_speed(0);
+    set_duty(0);
   } else if (emergency && (us_sensor0 >= 0.7 && us_sensor1 >= 0.7)) {
     emergency = false;
   }
@@ -181,13 +181,17 @@ int current_brake(int32_t brake_current) {
   return send_packet(cmd, len);
 }
 
+/*
+  This puts the motor to a full stop.
+  Maybe only use this for emergencies.
+*/
 int set_duty(int32_t duty) {
   const int len = 5; // cmd is 5 bytes long
   /*
   cmd[0]: what command (0x01 == COMM_SET_DUTY
   cmd[1-4]: duty in ?
   */
-  uint8_t cmd[len] = {0x03, 0x00, 0x00, 0x00, 0x00};
+  uint8_t cmd[len] = {0x01, 0x00, 0x00, 0x00, 0x00};
   cmd[1] = duty >> 24;
   cmd[2] = duty >> 16;
   cmd[3] = duty >> 8;
