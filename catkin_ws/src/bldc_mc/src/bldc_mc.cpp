@@ -36,12 +36,26 @@ void callback_uss(const sensor_msgs::Range::ConstPtr& msg,
 */
 int init_mc() {
   std::stringstream ss;
+  
+  const char *sp0 = "/dev/ttyACM0";
+  const char *sp1 = "/dev/ttyACM1";
+  const char *sp_path;
+
+  // Check if device file(s) exists
+  if (0 == access(sp0, 0)) { 
+    sp_path = sp0;
+  } else if (0 == access(sp1, 0)) { 
+    sp_path = sp1; 
+  } else {
+    ss << "Error, cant open Serial Port!\n";
+    ROS_INFO("%s", ss.str().c_str());
+    return -1;
+  }
  
   try {
-    mc = new Serial("/dev/ttyACM0", 115200);
+    mc = new Serial(sp_path, 115200);
   } catch(boost::system::system_error e) {
-    std::stringstream ss;
-    ss << "Error, cant open Serial Port /dev/ttyACM0!\n"
+    ss << "Error, cant open Serial Port!\n"
        << "Error msg: " << e.what();
     ROS_INFO("%s", ss.str().c_str());
     return -1;

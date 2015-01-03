@@ -4,6 +4,7 @@
 #include "ackermann_msgs/AckermannDrive.h"
 #include <bldc_mc/MCValues.h>
 
+#include <unistd.h>
 #include <iostream>
 #include <sstream>
 #include "Serial.hpp"
