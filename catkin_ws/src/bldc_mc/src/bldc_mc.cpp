@@ -69,7 +69,7 @@ int init_mc() {
 */
 int set_rpm(float speed) {
   const int len = 5; // SET_RPM commands are 5 bytes long
-  uint8_t cmd[len] = {0x04, 0x00, 0x00, 0x00, 0x00};
+  uint8_t cmd[len] = {COMM_SET_RPM, 0x00, 0x00, 0x00, 0x00};
   int32_t rpm = -int(1000*speed);
 
   //memcpy(&cmd[1], &speed_in_mA, sizeof(uint32_t)); 
@@ -91,7 +91,7 @@ int set_rpm(float speed) {
 */
 int set_speed(float speed) {
   const int len = 5; // Speed commands are 5 bytes long
-  uint8_t cmd[len] = {0x02, 0x00, 0x00, 0x00, 0x00};
+  uint8_t cmd[len] = {COMM_SET_CURRENT, 0x00, 0x00, 0x00, 0x00};
   int32_t speed_in_mA = -int(1000*speed);
 
   // If something is in front of the vehicle, only allow reverse
@@ -125,7 +125,7 @@ int set_steering(float angle, float angle_velocity) {
   cmd[2-3]: what position (based on angle)
   cmd[4]: what speed (0 to move instantly)
   */
-  uint8_t cmd[len] = {0x15, 0x00, 0x00, 0x00, 0x00};
+  uint8_t cmd[len] = {COMM_SERVO_MOVE, 0x00, 0x00, 0x00, 0x00};
 
   /* The angle we get in is a float in range[-45, 45]
      We do not know why 114 seems to be the standard position,
@@ -149,7 +149,7 @@ int current_brake(int32_t brake_current) {
   cmd[0]: what command (0x03 == COMM_SET_CURRENT_BRAKE
   cmd[1-4]: current in mA
   */
-  uint8_t cmd[len] = {0x03, 0x00, 0x00, 0x00, 0x00};
+  uint8_t cmd[len] = {COMM_SET_CURRENT_BRAKE, 0x00, 0x00, 0x00, 0x00};
   cmd[1] = brake_current >> 24;
   cmd[2] = brake_current >> 16;
   cmd[3] = brake_current >> 8;
@@ -172,7 +172,7 @@ int set_duty(int32_t duty) {
   cmd[0]: what command (0x01 == COMM_SET_DUTY
   cmd[1-4]: duty in ?
   */
-  uint8_t cmd[len] = {0x01, 0x00, 0x00, 0x00, 0x00};
+  uint8_t cmd[len] = {COMM_SET_DUTY, 0x00, 0x00, 0x00, 0x00};
   cmd[1] = duty >> 24;
   cmd[2] = duty >> 16;
   cmd[3] = duty >> 8;
@@ -288,17 +288,17 @@ void process_packet(const unsigned char *data, int len) {
     return;
   }
 
-  uint8_t packet_id;
+  COMM_PACKET_ID packet_id;
   int32_t ind = 0;
 
-  packet_id = data[0];
+  packet_id = (COMM_PACKET_ID) data[0];
   data++;
   len--;
 
   bldc_mc::MCValues msg; 
 
   switch (packet_id) {
-    case 0: //0 == COMM_GET_VALUES
+    case COMM_GET_VALUES: // 0x00 == COMM_GET_VALUES
       ind = 0;
       msg.TEMP_MOS1 = ((double)buffer_get_int16(data, &ind)) / 10.0; 
       msg.TEMP_MOS2 = ((double)buffer_get_int16(data, &ind)) / 10.0;
@@ -333,13 +333,13 @@ void process_packet(const unsigned char *data, int len) {
 }
 
 void get_values() {
-  unsigned char cmd[1] = {0x00};
+  unsigned char cmd[1] = {0x00}; // 0x00 == COMM_GET_VALUES
   send_packet(cmd, 1);
   recv_packet();
 }
 
 void send_alive() {
-  uint8_t cmd[1] = {0x12};
+  uint8_t cmd[1] = {COMM_ALIVE}; // 0x12 == COMM_ALIVE
   send_packet(cmd, 1);
 }
 
