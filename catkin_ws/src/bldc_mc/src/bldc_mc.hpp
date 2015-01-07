@@ -45,12 +45,17 @@ const unsigned short crc16_tab[] = { 0x0000, 0x1021, 0x2042, 0x3063, 0x4084,
 void callback_uss(const sensor_msgs::Range::ConstPtr& msg, const std::string &sensor_name);
 int init_mc();
 int set_speed(float speed);
+float speed_to_current(float speed);
+int set_rpm(float speed);
+int speed_to_rpm(float speed);
 int set_steering(float angle, float angle_velocity);
 int current_brake(int32_t current_in_mA);
 int set_duty(int32_t duty);
+
 unsigned short crc16(const unsigned char *buf, unsigned int len);
 int16_t buffer_get_int16(const uint8_t *buffer, int32_t *index);
 int32_t buffer_get_int32(const uint8_t *buffer, int32_t *index);
+
 void process_packet(const unsigned char *data, int len);
 int send_packet(const unsigned char *data, int len);
 int recv_packet();

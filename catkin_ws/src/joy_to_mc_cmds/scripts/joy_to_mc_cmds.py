@@ -46,16 +46,17 @@ def callback(data, pub):
   
     if data.buttons[1] == 0: direction = 1
     else: direction = -1
-    degree = data.axes[0]*45
-    current = speedToCurrent(data.axes[4])*direction
+    degree = data.axes[0]*22
+    
+    speed = speedToSpeed(data.axes[4])*direction
     
     rospy.loginfo("Setting degree to %f\n", degree)
-    rospy.loginfo("Setting current to %f\n", current)
+    rospy.loginfo("Setting speed to %f\n", speed)
 
     # Create AckermannDrive msg
     drive = AckermannDrive()
     drive.steering_angle = degree
-    drive.speed = current
+    drive.speed = speed
     
     # Publish under topic 'mc_cmds'
     pub.publish(drive)
@@ -69,22 +70,17 @@ def init():
     rospy.Subscriber("joy", Joy, callback, pub)
 
 
-# Converts a keypress (between 1.0 and -1.0) to a current in Ampere.
-def speedToCurrent(speed):
+# Converts a keypress (between 1.0 and -1.0) to between 0.0 and 1.0.
+# If speed is exactly 50% (speed == 0.0), discard the value because
+# that is probably a fault in joy.
+def speedToSpeed(speed):
   # Sometimes joy_node says that axis[4] is 0 (even though it should be 1.0
   # when not pressed)
-  if speed == 0: return 0;
+  if speed == 0: return 0
 
   # For convenience, we want a value between 0.0 and 1.0
   speed = -((speed-1)/2)
-  MAX_CURRENT = 6 # Max speed in current
-
-  if speed < 0.2:
-    current = 0
-  else:
-    current = speed*MAX_CURRENT
-
-  return current
+  return speed
  
  
 # Converts from joystick angle to steering angle.
@@ -96,7 +92,7 @@ def speedToCurrent(speed):
 #    degree = 70*angle
 #    return degree
 
-        
+
 if __name__ == '__main__':
     rospy.init_node('joy_listener_talker', anonymous=False)
     init()

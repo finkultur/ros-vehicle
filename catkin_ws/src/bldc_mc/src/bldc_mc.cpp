@@ -36,7 +36,7 @@ void callback_uss(const sensor_msgs::Range::ConstPtr& msg,
 */
 int init_mc() {
   std::stringstream ss;
- 
+  
   try {
     mc = new Serial("/dev/bldc_mc", 115200);
   } catch(boost::system::system_error e) {
@@ -49,15 +49,13 @@ int init_mc() {
 }
 
 /*
-  Sends a speed command to the motor controller.
-  Parameter speed is assumed to be given as rpm/1000.
+  Sends an set rpm command to the motor controller.
 */
 int set_rpm(float speed) {
   const int len = 5; // SET_RPM commands are 5 bytes long
   uint8_t cmd[len] = {COMM_SET_RPM, 0x00, 0x00, 0x00, 0x00};
-  int32_t rpm = -int(1000*speed);
+  int32_t rpm = -int(speed_to_rpm(speed));
 
-  //memcpy(&cmd[1], &speed_in_mA, sizeof(uint32_t)); 
   cmd[1] = rpm >> 24;
   cmd[2] = rpm >> 16;
   cmd[3] = rpm >> 8;
@@ -71,13 +69,27 @@ int set_rpm(float speed) {
 }
 
 /*
+  Converts a speed to an RPM.
+*/
+int speed_to_rpm(float speed) {
+  float rpm;
+  int MAX_RPM = 15000;
+  if (fabsf(speed) < 0.4) {
+    rpm = 0;
+  } else {
+    rpm = speed*MAX_RPM;
+  }
+  return rpm;
+}
+
+/*
   Sends a speed command to the motor controller.
   Parameter speed is given in ampere.
 */
 int set_speed(float speed) {
   const int len = 5; // Speed commands are 5 bytes long
   uint8_t cmd[len] = {COMM_SET_CURRENT, 0x00, 0x00, 0x00, 0x00};
-  int32_t speed_in_mA = -int(1000*speed);
+  int32_t speed_in_mA = -int(1000*speed_to_current(speed));
 
   // If something is in front of the vehicle, only allow reverse
   if (emergency && speed > 0) {
@@ -95,6 +107,20 @@ int set_speed(float speed) {
 
   current_speed = speed_in_mA;
   return send_packet(cmd, len);
+}
+
+/*
+  Converts a value that is between [-1.0,1.0] to a current.
+*/
+float speed_to_current(float speed) {
+  float current;
+  int MAX_CURRENT = 6; // Max speed in current
+  if (fabsf(speed) < 0.2) {
+    current = 0;
+  } else {
+    current = speed*MAX_CURRENT;
+  }
+  return current;
 }
 
 /*
@@ -116,7 +142,7 @@ int set_steering(float angle, float angle_velocity) {
      We do not know why 114 seems to be the standard position,
      but it will keep the wheels in (almost) default position. 
      The motor controller wants a number between [114-70, 114+70] */
-  int16_t position = int16_t(angle*70/45+114);
+  int16_t position = int16_t(angle*70/22+114);
   cmd[2] = position >> 8;
   cmd[3] = position;
 
@@ -358,8 +384,8 @@ int main(int argc, char **argv)
   
   int counter = 0;
   while (ros::ok()) {
-    // Get values every 200ms
-    if (counter % 200 == 0) {
+    // Get values every 50ms
+    if (counter % 50 == 0) {
       get_values();
     }
     // Send COMM_ALIVE every 50 ms
