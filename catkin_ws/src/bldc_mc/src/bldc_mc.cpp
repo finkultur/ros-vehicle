@@ -9,7 +9,7 @@ using namespace boost;
 void callback(const ackermann_msgs::AckermannDrive::ConstPtr& msg) {
   ROS_INFO("Got a message!: \nSteering angle: %f\nSteering angle velocity:%f\nSpeed: %f\nAcceleration: %f\nJerk: %f\n", msg->steering_angle, msg->steering_angle_velocity, msg->speed,msg->acceleration, msg->jerk);
 
-  set_speed(msg->speed);
+  set_rpm(msg->speed);
   set_steering(msg->steering_angle, msg->steering_angle_velocity);
 }
 
@@ -23,7 +23,7 @@ void callback_uss(const sensor_msgs::Range::ConstPtr& msg,
 
   if (!emergency && (us_sensor0 < 0.7 || us_sensor1 < 0.7)) {
     emergency = true;
-    set_speed(0);
+    set_rpm(0);
     set_duty(0);
   } else if (emergency && (us_sensor0 >= 0.7 && us_sensor1 >= 0.7)) {
     emergency = false;
@@ -74,7 +74,7 @@ int set_rpm(float speed) {
 int speed_to_rpm(float speed) {
   float rpm;
   int MAX_RPM = 15000;
-  if (fabsf(speed) < 0.4) {
+  if (fabsf(speed) < 0.15) {
     rpm = 0;
   } else {
     rpm = speed*MAX_RPM;
