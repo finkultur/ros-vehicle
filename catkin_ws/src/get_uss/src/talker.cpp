@@ -60,17 +60,17 @@ int main(int argc, char **argv)
 	ros::Publisher us_sensor1 = n.advertise<sensor_msgs::Range>("us_sensor1", 1000);
 	
 	try {
-		sensor_0 = new Serial("/dev/ttyUSB0", 19200);
+		sensor_0 = new Serial("/dev/ussE4", 19200);
 	} catch(boost::system::system_error& e) {
 		std::stringstream ss;
-		ss << "Error, can not open /dev/ttyUSB0!\n" << "Error msg: " << e.what();
+		ss << "Error, can not open /dev/ussE4!\n" << "Error msg: " << e.what();
 		ROS_INFO("%s", ss.str().c_str());
 	}
 	try {
-		sensor_1 = new Serial("/dev/ttyUSB1", 19200);	
+		sensor_1 = new Serial("/dev/ussE6", 19200);	
 	} catch(boost::system::system_error& e) {
 		std::stringstream ss;
-		ss << "Error, can not open /dev/ttyUSB1!\n" << "Error msg: " << e.what();
+		ss << "Error, can not open /dev/ussE6!\n" << "Error msg: " << e.what();
 		ROS_INFO("%s", ss.str().c_str());
 	} 
 

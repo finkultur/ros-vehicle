@@ -41,7 +41,7 @@ from std_msgs.msg import String
 from get_imu.msg import IMUData
 
 def talker():
-    ser = serial.Serial('/dev/ttyACM0')
+    ser = serial.Serial('/dev/imu')
 
     pub = rospy.Publisher('imu_data', IMUData, queue_size=10)
     rospy.init_node('imu_talker', anonymous=True)
