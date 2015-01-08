@@ -47,7 +47,6 @@ def callback(data, pub):
     if data.buttons[1] == 0: direction = 1
     else: direction = -1
     degree = data.axes[0]*22
-    
     speed = speedToSpeed(data.axes[4])*direction
     
     rospy.loginfo("Setting degree to %f\n", degree)

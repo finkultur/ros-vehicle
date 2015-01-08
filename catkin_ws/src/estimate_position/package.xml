@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package>
-  <name>bldc_mc</name>
+  <name>estimate_position</name>
   <version>0.0.0</version>
-  <description>The bldc_mc package</description>
+  <description>The estimate_position package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="vikni@student.chalmers.se">faj</maintainer>
+  <maintainer email="ros2@todo.todo">ros2</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/bldc_mc</url> -->
+  <!-- <url type="website">http://wiki.ros.org/estimate_position</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
@@ -36,7 +36,7 @@
   <!-- Use buildtool_depend for build tool packages: -->
   <!--   <buildtool_depend>catkin</buildtool_depend> -->
   <!-- Use run_depend for packages you need at runtime: -->
-  <run_depend>message_runtime</run_depend> 
+  <run_depend>message_runtime</run_depend>
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>

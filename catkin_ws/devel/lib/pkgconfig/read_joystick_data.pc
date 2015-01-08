@@ -1,8 +1,0 @@
-prefix=/home/ros/git/dat295/vehicle/catkin_ws/devel
-
-Name: read_joystick_data
-Description: Description of read_joystick_data
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/ros/git/dat295/vehicle/catkin_ws/devel/lib 
-Requires: 

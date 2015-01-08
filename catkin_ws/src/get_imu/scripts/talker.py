@@ -37,24 +37,27 @@
 ## 'imu_data' topic. Code based on various ROS-tutorials.
 
 import rospy, serial
+import sys
 from std_msgs.msg import String
 from get_imu.msg import IMUData
+import roslib
 
-def talker():
+def talker(freq):
     ser = serial.Serial('/dev/imu')
-
     pub = rospy.Publisher('imu_data', IMUData, queue_size=10)
-    rospy.init_node('imu_talker', anonymous=True)
-    r = rospy.Rate(1) # 1Hz
+    
+    r = rospy.Rate(freq) # Hz
+
     while not rospy.is_shutdown():
       ser.write('r')
       ser.flush()
-      #str = "Time is %s\n"%rospy.get_time()
 
       data = ser.readline()
       msg = parseIMUData(data) 
 
-      rospy.loginfo(msg)
+      # Sets the timestamp in the msg header
+      msg.header.stamp = rospy.get_rostime()
+
       pub.publish(msg)
       r.sleep()
 
@@ -69,19 +72,22 @@ def parseIMUData(indata):
   mag = data[2].split(',')
 
   msg = IMUData()
-  msg.gyro0 = float(gyro[0])
-  msg.gyro1 = float(gyro[1])
-  msg.gyro2 = float(gyro[2])
-  msg.acc0 = float(acc[0])
-  msg.acc1 = float(acc[1])
-  msg.acc2 = float(acc[2])
-  msg.mag0 = float(mag[0])
-  msg.mag1 = float(mag[1])
-  msg.mag2 = float(mag[2])
+  msg.gyroX = float(gyro[0])
+  msg.gyroY = float(gyro[1])
+  msg.gyroZ = float(gyro[2])
+  msg.accX = float(acc[0])
+  msg.accY = float(acc[1])
+  msg.accZ = float(acc[2])
+  msg.magX = float(mag[0])
+  msg.magY = float(mag[1])
+  msg.magZ = float(mag[2])
+  
   return msg
-   
         
 if __name__ == '__main__':
+    rospy.init_node('imu_talker', anonymous=True)
+    freq =  int(rospy.get_param('~freq', '10'))
+
     try:
-        talker()
+      talker(freq)
     except rospy.ROSInterruptException: pass

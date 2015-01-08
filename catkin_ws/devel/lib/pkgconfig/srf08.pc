@@ -1,8 +1,0 @@
-prefix=/home/ros/git/dat295/vehicle/catkin_ws/devel
-
-Name: srf08
-Description: Description of srf08
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/ros/git/dat295/vehicle/catkin_ws/devel/lib 
-Requires: 
