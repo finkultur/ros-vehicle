@@ -32,10 +32,29 @@
 #define usb_lld_connect_bus(usbp)
 #define usb_lld_disconnect_bus(usbp)
 
+#define number_of_samples 2048
+#define sample_freq 40 // hz
+
 /* Virtual serial port over USB.*/
 SerialUSBDriver SDU1;
 
 static float mdps_per_digit = 8.75;
+
+
+typedef enum 
+{
+  LED3 = GPIOE_LED3_RED,
+  LED4 = GPIOE_LED4_BLUE,
+  LED5 = GPIOE_LED5_ORANGE,
+  LED6 = GPIOE_LED6_GREEN,
+  LED7 = GPIOE_LED7_GREEN,
+  LED8 = GPIOE_LED8_ORANGE,
+  LED9 = GPIOE_LED9_BLUE,
+  LED10 = GPIOE_LED10_RED
+} LedIO;
+
+uint8_t led_counter = 0;
+static uint8_t LED[] = {LED3, LED4, LED5, LED6, LED7, LED8, LED9, LED10};
 
 
 static const SPIConfig spi1cfg = {
@@ -52,6 +71,7 @@ static const I2CConfig i2cconfig = {
   0,
   0
 };
+ 
 
 /*static uint8_t readByteSPI(uint8_t reg)
 {
@@ -165,6 +185,75 @@ static uint8_t readMag(float* data)
     return 1;
 }
 
+/*
+  Lights the compass, one led at every call, if 
+  all leds are turned on, it turns all leds off
+  and starts over
+*/
+static void light_compass() {
+  if(led_counter > 7) {
+    int i;
+    for(i = 0; i < 8; i++) {
+      palClearPad(GPIOE, LED[i]);
+    }
+    led_counter = 0;
+  } 
+
+  palSetPad(GPIOE, LED[led_counter]);
+  led_counter = led_counter + 1;
+}
+
+/*
+  returns a float_t array[3] containing the drift value for x, y and z axies on the gyro
+*/
+static void calibrate_gyro(float *gyro_drift) {
+  float tot_x = 0;
+  float tot_y = 0;
+  float tot_z = 0;
+
+  float gyroData[3];
+
+  int counter = 0;
+  while(true) {
+    // read from the gyro
+    if(readGyro(gyroData)) {
+      tot_x = tot_x + gyroData[0];
+      tot_y = tot_y + gyroData[1];
+      tot_z = tot_z + gyroData[2];
+
+      counter++;
+
+      light_compass();
+
+      // if we have collected 'number_of_samples' samples, exit while loop
+      if(counter >= number_of_samples) {
+        break;
+      }
+    }
+
+    // sleeps according to given freq    
+    chThdSleepMilliseconds(1000/sample_freq);
+  }
+  chThdSleepMilliseconds(500);
+
+  // calculate mean of drift
+  gyro_drift[0] = tot_x / number_of_samples;
+  gyro_drift[1] = tot_y / number_of_samples;
+  gyro_drift[2] = tot_z / number_of_samples;
+
+  // turn of leds
+  int j;
+  for(j = 0; j < 8; j++) {
+    palClearPad(GPIOE, LED[j]);
+  }
+
+  // turn on the green leds
+  palSetPad(GPIOE, LED[4]);
+  palSetPad(GPIOE, LED[3]);
+} 
+
+
+
 int main(void) {
     halInit();
     chSysInit();
@@ -183,6 +272,10 @@ int main(void) {
     initAccel();
     initMag();
     chThdSleepMilliseconds(500);
+
+
+    float gyro_drift[3];
+    calibrate_gyro(gyro_drift);
 			
 	while(TRUE) {
 		int receive = chnGetTimeout(&SDU1, TIME_IMMEDIATE);
@@ -197,7 +290,7 @@ int main(void) {
 				if (readGyro(gyroData) && readAccel(accelData) && readMag(magData)) {
           chprintf((BaseSequentialStream *)&SDU1, 
             "%f,%f,%f:%f,%f,%f:%f,%f,%f\n",
-            gyroData[0], gyroData[1], gyroData[2],
+            gyroData[0]-gyro_drift[0], gyroData[1]-gyro_drift[1], gyroData[2]-gyro_drift[2],
             accelData[0], accelData[1], accelData[2],
             magData[0], magData[1], magData[2]);
 				  /*

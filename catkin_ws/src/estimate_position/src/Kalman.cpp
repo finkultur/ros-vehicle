@@ -41,7 +41,7 @@ void Kalman::update_gyro(Position* pos, float gyro, float t) {
 		-1.61 is hardcoded drift for the gyro:s z axis
 		and convert it to radians
 	*/
-	delta_heading_radian = (delta_time * (gyro - 1.61)) / 180.0 * PI;
+	delta_heading_radian = (delta_time * gyro) / 180.0 * PI;
 
 	/* 	
 		sums up the old heading with the new heading to be able to
