@@ -23,10 +23,12 @@ void callback_uss(const sensor_msgs::Range::ConstPtr& msg,
 
   if (!emergency && (us_sensor0 < 0.7 || us_sensor1 < 0.7)) {
     emergency = true;
-    set_rpm(0);
-    set_duty(0);
+    prev_speed = current_speed;
+    //set_rpm(0);
+    //set_duty(0);
   } else if (emergency && (us_sensor0 >= 0.7 && us_sensor1 >= 0.7)) {
     emergency = false;
+    //set_rpm(prev_speed);
   }
 } 
 
@@ -65,6 +67,7 @@ int set_rpm(float speed) {
   printf("SET_RPM command to be sent: %02x, %02x, %02x, %02x, %02x\n",
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
 
+  current_speed = speed;
   return send_packet(cmd, len);
 }
 
@@ -105,7 +108,7 @@ int set_speed(float speed) {
   printf("Speed command to be sent: %02x, %02x, %02x, %02x, %02x\n",
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
 
-  current_speed = speed_in_mA;
+  current_speed = speed;
   return send_packet(cmd, len);
 }
 

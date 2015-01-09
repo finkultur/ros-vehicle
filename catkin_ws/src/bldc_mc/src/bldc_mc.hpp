@@ -67,6 +67,7 @@ ros::Publisher mc_values_pub;
 
 float current_steering_angle;
 float current_speed;
+float prev_speed;
 float us_sensor0;
 float us_sensor1;
 bool emergency;
