@@ -5,6 +5,8 @@
   </node>
   <node pkg="get_uss" type="talker" name="US_range_data">
   </node>
+  <node pkg="get_imu" type="talker.py" name="IMU_data">
+  </node>
   <node pkg="estimate_position" type="estimate_position" name="pos_est">
   </node>
 </launch>
