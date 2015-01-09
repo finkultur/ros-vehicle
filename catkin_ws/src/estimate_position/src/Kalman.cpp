@@ -23,7 +23,8 @@ void Kalman::update_model(Position* pos, float distance, float steering_angle) {
 	new_y = pos->get_y() + delta_distace * sin(pos->get_heading());
 
 	// L = car length
-	new_heading = pos->get_heading() + (delta_distace * tan(steering_angle))/L;
+	//new_heading = pos->get_heading() + (delta_distace * tan(steering_angle))/L;
+  new_heading = pos->get_heading();
 
 	pos->set_x(new_x);
 	pos->set_y(new_y);

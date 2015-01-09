@@ -63,6 +63,9 @@ int main(int argc, char **argv) {
     pos_msg.x = pos->get_x();
     pos_msg.y = pos->get_y();
     pos_msg.heading = pos->get_heading();
+
+    pos_msg.header.stamp = ros::Time::now();
+
     position_publisher.publish(pos_msg);
 
     loop_rate.sleep();
