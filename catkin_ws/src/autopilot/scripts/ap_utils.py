@@ -2,7 +2,7 @@
 import math
 
 L = 0.3
-K_p = 0.8
+K_p = 0.5
 MIN_STEERING_ANGLE = -22.0
 MAX_STEERING_ANGLE = 22.0
 
