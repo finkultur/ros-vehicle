@@ -5,7 +5,7 @@
 #include "Kalman.hpp"
 #include <bldc_mc/MCValues.h>
 #include "get_imu/IMUData.h"
-#include "estimate_position/Position_msg.h"
+#include "estimate_position/Position.h"
 #include <ctime>
 
 using namespace std;
@@ -15,9 +15,9 @@ using namespace std;
 
 Kalman* filter;
 Position* pos;
-ros::Publisher position_publisher;
-ros::Subscriber bldc_lister;
-ros::Subscriber imu_lister;
+ros::Publisher pos_publisher;
+ros::Subscriber bldc_listener;
+ros::Subscriber imu_listener;
 
 bool recv_first_imu = false;
 double start_time;
@@ -25,4 +25,4 @@ double start_time;
 bool recv_first_bldc = false;
 double start_distance;
 
-void bldc_callback(const bldc_mc::MCValues::ConstPtr& msg);
+void pos_callback(const bldc_mc::MCValues::ConstPtr& msg);

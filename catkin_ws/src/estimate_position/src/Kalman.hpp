@@ -1,7 +1,6 @@
 /*
-	A naive and implemention of a "kalman" filter that
-	uses the bicycle model and the gyro to estimate a 
-	position
+	A naive and implemention of a "kalman" filter that uses the bicycle model
+  and the gyro to estimate a position.
 */
 
 #ifndef KALMAN_HPP

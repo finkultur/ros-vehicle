@@ -5,7 +5,7 @@ import math
 import time
 from std_msgs.msg import String
 from ackermann_msgs.msg import AckermannDrive
-from estimate_position.msg import Position_msg
+from estimate_position.msg import Position
 
 current_steering_angle = 0
 current_wp = 0
@@ -71,7 +71,7 @@ def autopilot():
   pub = rospy.Publisher('mc_cmds', AckermannDrive, queue_size=10)
 
   # Subscribe to Position
-  rospy.Subscriber("Position", Position_msg, callback_position, pub)
+  rospy.Subscriber("Position", Position, callback_position, pub)
 
   rospy.spin()
 
