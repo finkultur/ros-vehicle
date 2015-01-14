@@ -37,8 +37,15 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "talker");
   ros::NodeHandle n;
 
+  // Get parameters, set default values (0,0,0) if not found
+  int x, y;
+  float heading;
+  n.param("x", x, 0);
+  n.param("y", y, 0);
+  n.param("heading", heading, 0);
+
   filter = new Kalman();
-  pos = new Position();
+  pos = new Position(start_x, start_y, heading);
 
   // The message to publish
   estimate_position::Position pos_msg;
