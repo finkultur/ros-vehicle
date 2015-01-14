@@ -39,13 +39,13 @@ int main(int argc, char **argv) {
 
   // Get parameters, set default values (0,0,0) if not found
   int x, y;
-  float heading;
-  n.param("x", x, 0);
-  n.param("y", y, 0);
-  n.param("heading", heading, 0);
+  double heading;
+  n.param<int>("x", x, 0);
+  n.param<int>("y", y, 0);
+  n.param<double>("heading", heading, 0);
 
   filter = new Kalman();
-  pos = new Position(start_x, start_y, heading);
+  pos = new Position(x, y, (float)heading);
 
   // The message to publish
   estimate_position::Position pos_msg;
