@@ -105,7 +105,7 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-add_executable(bldc_mc src/bldc_mc.cpp)
+add_executable(bldc_mc src/bldc_mc.cpp src/utils.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes

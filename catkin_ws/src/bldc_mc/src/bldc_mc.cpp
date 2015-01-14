@@ -199,41 +199,15 @@ int set_duty(int32_t duty) {
   return send_packet(cmd, len);
 }
 
-/*
-  Calculates a checksum of the given data.
-  From bldc-tool/packetinterface.cpp.
-*/
-unsigned short crc16(const unsigned char *buf, unsigned int len) {
-  unsigned int i;
-  unsigned short cksum = 0;
-  for (i = 0; i < len; i++) {
-    cksum = crc16_tab[(((cksum >> 8) ^ *buf++) & 0xFF)] ^ (cksum << 8);
-  }
-  return cksum;
+void get_values() {
+  unsigned char cmd[1] = {0x00}; // 0x00 == COMM_GET_VALUES
+  send_packet(cmd, 1);
+  recv_packet();
 }
 
-/*
-  Returns an int16_t from the buffer, increasing the index by 2 bytes.
-  Code from bldc/buffer.c.
-*/
-int16_t buffer_get_int16(const uint8_t *buffer, int32_t *index) {
-  int16_t res = ((uint16_t) buffer[*index]) << 8 |
-          ((uint16_t) buffer[*index + 1]);
-  *index += 2;
-  return res;
-}
-
-/*
-  Returns an int32_t from the buffer, increasing the index by 4 bytes.
-  Code from bldc/buffer.c.
-*/
-int32_t buffer_get_int32(const uint8_t *buffer, int32_t *index) {
-  int32_t res = ((uint32_t) buffer[*index]) << 24 |
-          ((uint32_t) buffer[*index + 1]) << 16 |
-          ((uint32_t) buffer[*index + 2]) << 8 |
-          ((uint32_t) buffer[*index + 3]);
-  *index += 4;
-  return res;
+void send_alive() {
+  uint8_t cmd[1] = {COMM_ALIVE}; // 0x12 == COMM_ALIVE
+  send_packet(cmd, 1);
 }
 
 /*
@@ -309,12 +283,12 @@ void process_packet(const unsigned char *data, int len) {
   data++;
   len--;
 
-  bldc_mc::MCValues msg; 
+  bldc_mc::MCValues msg;
 
   switch (packet_id) {
     case COMM_GET_VALUES: // 0x00 == COMM_GET_VALUES
       ind = 0;
-      msg.TEMP_MOS1 = ((double)buffer_get_int16(data, &ind)) / 10.0; 
+      msg.TEMP_MOS1 = ((double)buffer_get_int16(data, &ind)) / 10.0;
       msg.TEMP_MOS2 = ((double)buffer_get_int16(data, &ind)) / 10.0;
       msg.TEMP_MOS3 = ((double)buffer_get_int16(data, &ind)) / 10.0;
       msg.TEMP_MOS4 = ((double)buffer_get_int16(data, &ind)) / 10.0;
@@ -343,18 +317,6 @@ void process_packet(const unsigned char *data, int len) {
     default:
       break;
   }
-
-}
-
-void get_values() {
-  unsigned char cmd[1] = {0x00}; // 0x00 == COMM_GET_VALUES
-  send_packet(cmd, 1);
-  recv_packet();
-}
-
-void send_alive() {
-  uint8_t cmd[1] = {COMM_ALIVE}; // 0x12 == COMM_ALIVE
-  send_packet(cmd, 1);
 }
 
 

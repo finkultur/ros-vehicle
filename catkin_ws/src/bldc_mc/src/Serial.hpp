@@ -26,6 +26,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+#ifndef SERIAL_H
+#define SERIAL_H
+
 #include <boost/asio.hpp>
 #include <iostream>
 
@@ -101,3 +104,6 @@ class Serial
 			return c;
 		}
 };
+
+#endif
+
