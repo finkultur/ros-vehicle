@@ -375,12 +375,17 @@ int main(int argc, char **argv)
   us_sensor0 = 0;
   us_sensor1 = 0;
 
-  ros::Subscriber sub_mc_cmd = n.subscribe("mc_cmds", 1, callback);
+  ros::Subscriber sub_mc_cmds = n.subscribe("mc_cmds", 1, callback);
+
   // We pass the topic name to the US-sensor callback function
-  ros::Subscriber sub_uss0 = n.subscribe<sensor_msgs::Range>("us_sensor0", 1, 
-                             boost::bind(callback_uss, _1, "us_sensor0"));
-  ros::Subscriber sub_uss1 = n.subscribe<sensor_msgs::Range>("us_sensor1", 1, 
-                             boost::bind(callback_uss, _1, "us_sensor1"));
+  bool enable_uss;
+  n.param<bool>("enable_uss", enable_uss, true);
+  if (enable_uss) {
+    ros::Subscriber sub_uss0 = n.subscribe<sensor_msgs::Range>("us_sensor0", 1, 
+                               boost::bind(callback_uss, _1, "us_sensor0"));
+    ros::Subscriber sub_uss1 = n.subscribe<sensor_msgs::Range>("us_sensor1", 1, 
+                               boost::bind(callback_uss, _1, "us_sensor1"));
+  }
 
   ros::Rate loop_rate(1000);
   mc_values_pub = n.advertise<bldc_mc::MCValues>("mc_values", 1000);
