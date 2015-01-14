@@ -72,3 +72,39 @@ def update_steering_angle(px,py,cx,cy,heading,steering_angle):
 #print(update_steering_angle(10,10,0,0, 45, 22))
 
 
+# TODO: Fix this!
+def is_point_behind_front(x,y,car_x,car_y,heading):
+  # Get point of car front
+  (front_x,front_y) = get_new_point(car_x,car_y,heading,0.3)
+  # Calculate a point p1 that is to the left of front
+  (p1x,p1y) = get_new_point(front_x,front_y,10,heading+math.pi/4)
+  # Calculate a point p2 that is to the left of front
+  (p2x,p2y) = get_new_point(front_x,front_y,10,heading-math.pi/4)
+
+  #if (p1x < p2x):
+  #  return is_point_behind_line(x,y,p1x,p1y,p2x,p2y)
+  #else:
+  #  return is_point_behind_line(x,y,p2x,p2y,p1x,p1y)
+  return is_point_behind_line(x,y,p2x,p2y,p1x,p1y)
+  
+
+def get_new_point(x,y,length,heading):
+  new_x = x + length * math.cos(heading)
+  new_y = y + length * math.sin(heading)
+  return (new_x,new_y)
+
+
+# Returns true if (x,y) is under the line that is between the points
+# (px0,px0) and (lx1,ly1).
+def is_point_behind_line(x,y,px0,py0,px1,py1):
+  v1 = (px1-px0, py1-py0)
+  v2 = (px1-x, py1-y)
+  xp = v1[0]*v2[1] - v1[1]*v2[0]
+
+  if xp > 0:
+    return True
+  elif xp < 0:
+    return False
+  else:
+    return False
+
