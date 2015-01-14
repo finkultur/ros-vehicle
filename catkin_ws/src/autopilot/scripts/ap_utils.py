@@ -1,4 +1,3 @@
-
 import math
 
 L = 0.3
@@ -68,37 +67,42 @@ def update_steering_angle(px,py,cx,cy,heading,steering_angle):
 
   return max(MIN_STEERING_ANGLE, min(steering_angle, MAX_STEERING_ANGLE))
 
-#print(math.degrees(get_angle_error(10,10,0,0,90)))
-#print(update_steering_angle(10,10,0,0, 45, 22))
 
-
-# TODO: Fix this!
 def is_point_behind_front(x,y,car_x,car_y,heading):
+  global L
+
   # Get point of car front
-  (front_x,front_y) = get_new_point(car_x,car_y,heading,0.3)
+  (front_x,front_y) = get_new_point(car_x,car_y,heading,L)
   # Calculate a point p1 that is to the left of front
-  (p1x,p1y) = get_new_point(front_x,front_y,10,heading+math.pi/4)
-  # Calculate a point p2 that is to the left of front
-  (p2x,p2y) = get_new_point(front_x,front_y,10,heading-math.pi/4)
+  (p1x,p1y) = get_new_point(front_x,front_y,10,heading+math.pi/2)
+  # Calculate a point p2 that is to the right of front
+  (p2x,p2y) = get_new_point(front_x,front_y,10,heading-math.pi/2)
 
-  #if (p1x < p2x):
-  #  return is_point_behind_line(x,y,p1x,p1y,p2x,p2y)
-  #else:
-  #  return is_point_behind_line(x,y,p2x,p2y,p1x,p1y)
-  return is_point_behind_line(x,y,p2x,p2y,p1x,p1y)
-  
+  # This catches some corner-cases due to rounding errors
+  if heading == math.pi:
+    return car_x-L < x 
+  elif heading == 0:
+    return car_x+L > x 
 
-def get_new_point(x,y,length,heading):
-  new_x = x + length * math.cos(heading)
-  new_y = y + length * math.sin(heading)
+  if (heading < math.pi):
+    return is_point_behind_line(x,y,p1x,p1y,p2x,p2y)
+  else:
+    return is_point_behind_line(x,y,p2x,p2y,p1x,p1y)
+ 
+ 
+# Returns a new point from angle and length of vector
+def get_new_point(x,y,L,heading):
+  global L
+  new_x = x + L * math.cos(heading)
+  new_y = y + L * math.sin(heading)
   return (new_x,new_y)
 
 
 # Returns true if (x,y) is under the line that is between the points
-# (px0,px0) and (lx1,ly1).
-def is_point_behind_line(x,y,px0,py0,px1,py1):
-  v1 = (px1-px0, py1-py0)
-  v2 = (px1-x, py1-y)
+# (px1,px1) and (px2,py2).
+def is_point_behind_line(x,y,px1,py1,px2,py2):
+  v1 = (px2-px1, py2-py1)
+  v2 = (px2-x, py2-y)
   xp = v1[0]*v2[1] - v1[1]*v2[0]
 
   if xp > 0:
@@ -108,11 +112,11 @@ def is_point_behind_line(x,y,px0,py0,px1,py1):
   else:
     return False
 
+
 # This is needed since all image viewers has (0,0) in top left corner
 # [(1,2),(3,4)] => [(1,-2),(3,-4)]
 def negate_y(array):
   for i, (x,y) in enumerate(array):
      array[i] = (x,-y)
   return array
-
 
