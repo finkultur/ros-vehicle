@@ -108,3 +108,11 @@ def is_point_behind_line(x,y,px0,py0,px1,py1):
   else:
     return False
 
+# This is needed since all image viewers has (0,0) in top left corner
+# [(1,2),(3,4)] => [(1,-2),(3,-4)]
+def negate_y(array):
+  for i in range(len(array)):
+    (x,y) = array[i]
+    array[i] = (x,-y)
+  return array
+
