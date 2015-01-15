@@ -32,7 +32,7 @@
 #define usb_lld_connect_bus(usbp)
 #define usb_lld_disconnect_bus(usbp)
 
-#define number_of_samples 2048
+#define number_of_samples 3072 
 #define sample_freq 40 // hz
 
 /* Virtual serial port over USB.*/

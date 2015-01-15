@@ -64,7 +64,7 @@ endif
 PROJECT = stm32f3discovery-demo
 
 # Imported source files and paths
-CHIBIOS = /home/faj/Downloads/ChibiOS_2.6.6
+CHIBIOS = /home/ros/Downloads/ChibiOS-RT-master
 include $(CHIBIOS)/boards/ST_STM32F3_DISCOVERY/board.mk
 include $(CHIBIOS)/os/hal/platforms/STM32F30x/platform.mk
 include $(CHIBIOS)/os/hal/hal.mk
