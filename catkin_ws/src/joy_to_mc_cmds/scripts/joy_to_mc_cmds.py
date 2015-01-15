@@ -79,6 +79,8 @@ def speedToSpeed(speed):
 
   # For convenience, we want a value between 0.0 and 1.0
   speed = -((speed-1)/2)
+  if speed < 0.25:
+    return 0
   return speed
  
  
