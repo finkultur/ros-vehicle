@@ -38,14 +38,17 @@ int main(int argc, char **argv) {
   ros::NodeHandle n;
 
   // Get parameters, set default values (0,0,0) if not found
-  int x, y;
+  double x, y;
   double heading;
-  n.param<int>("x", x, 0);
-  n.param<int>("y", y, 0);
+  n.param<double>("x", x, 2.015);
+  n.param<double>("y", y, -0.585);
   n.param<double>("heading", heading, 0);
+  /*n.getParam("x", x);
+  n.getParam("y", y);
+  n.getParam("heading", heading);*/
 
   filter = new Kalman();
-  pos = new Position(x, y, (float)heading);
+  pos = new Position((float)x, (float)y, (float)heading);
 
   // The message to publish
   estimate_position::Position pos_msg;
