@@ -7,8 +7,11 @@ from std_msgs.msg import String
 from ackermann_msgs.msg import AckermannDrive
 from estimate_position.msg import Position
 
+last_drive_msg = AckermannDrive()
 current_steering_angle = 0
 current_wp = 0
+finished = False
+
 #wps = [(0.0,0.0),(0.5,0.0),(1.0,0.0),(1.5,0.0),(2.0,0.0),(2.5,0.5),(3.0,1.0),(3.0,1.5),(3.0,2.0),(2.5,1.5),(2.0,2.0),(1.5,2.0),(1.0,2.0),(0.5,2.0),(0.0,2.0)]
 #wps = [(0,0),(1,0),(2,1),(2,2),(1,2.5),(0,2),(0,0)]
 
@@ -23,13 +26,17 @@ wps = [(2.0,0.0),(2.3,0.1),(2.5,0.2),(2.7,0.4),(2.9,0.6),(2.9,0.9),(2.9,1.2),(2.
 # Banana + loop
 #wps = {(2.6,0.0),(3.2,0.0),(3.7,0.1),(4.1,0.1),(4.5,0.1),(5.1,0.2),(5.5,0.3),(5.7,0.6),(6.0,0.9),(6.2,1.2),(6.3,1.6),(6.3,2.1),(6.3,2.6),(6.1,2.9),(5.6,3.2),(5.2,3.5),(5.0,4.0),(4.7,4.6),(3.8,5.1),(2.8,5.2),(2.0,5.0),(1.6,4.3),(2.0,3.8),(2.6,3.4),(3.3,3.1),(3.6,2.6),(3.7,1.9),(3.4,1.1),(2.8,0.8),(2.0,0.9),(1.5,1.4),(1.4,2.0),(1.6,2.5),(2.3,2.8),(3.1,2.8),(4.0,2.7),(4.4,2.1),(4.5,1.5),(4.4,0.9),(4.0,0.6),(3.4,0.4),(3.0,0.2),(2.6,0.2)}
 
+wps = (0,0),(0.46,0.19),(1.48,0.6),(2.22,0.6),(2.86,0.6),(3.66,0.6),(4.4,0.6),(4.83,0.88),(5.26,1.12),(5.5,1.44),(5.55,1.84),(5.53,2.28),(5.53,7.2),(5.4,7.8),(5.2,8.25),(4.7,8.4),(4.3,8.4),(1.8,8.4),(1.1,8.3),(0.7,8.1),(0.7,2.16)
+
+# Forward and turn left
+#wps = [(0,0),(3,0),(5,1),(6,2),(6,3.5)]
 
 # This is needed since we are getting coordinates that starts with (0,0) in top
 # left corner.
 wps = ap_utils.negate_y(wps)
 
 def callback_position(pos, pub):
-  global current_steering_angle, current_wp, wps
+  global last_drive_msg, current_steering_angle, current_wp, wps, finished
 
   #rospy.loginfo(rospy.get_name() + 
   #  "Got a new position: x=%f, y=%f, heading=%f\n" %
@@ -43,12 +50,12 @@ def callback_position(pos, pub):
     if current_wp < len(wps)-1:
       rospy.loginfo("I reached waypoint %i!" % (current_wp))
       current_wp += 1
-      drive.speed = 0.20
+      drive.speed = 0.35
     elif current_wp == len(wps)-1:
       rospy.loginfo("I reached my destination!\n")
-      drive.speed = 0.0
-  else:
-    drive.speed = 0.20
+      finished = True
+  elif not finished:
+    drive.speed = 0.35
   
   # If more than x meters away from start, stop the car
   if abs(pos.x) > 5 or abs(pos.y) > 5:
@@ -61,8 +68,11 @@ def callback_position(pos, pub):
     pos.x, pos.y, pos.heading, current_steering_angle)
   drive.steering_angle = math.degrees(current_steering_angle)
 
-  # Publish under topic 'mc_cmds'
-  pub.publish(drive)
+  
+  if drive != last_drive_msg:
+    last_drive_msg = drive
+    # Publish under topic 'mc_cmds'
+    pub.publish(drive)
 
 
 def autopilot():
