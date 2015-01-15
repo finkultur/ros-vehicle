@@ -10,7 +10,8 @@
 
 using namespace std;
 
-#define m_per_tick 0.002173913043
+//#define m_per_tick 0.002173913043
+# define m_per_tick 0.00221238938 // 452 ticks/m
 #define PI 3.14159265
 
 Kalman* filter;
