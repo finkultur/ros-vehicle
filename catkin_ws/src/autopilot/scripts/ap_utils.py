@@ -1,29 +1,35 @@
 import math
+import rospy
 
 L = 0.3
-K_p = 0.5
-MIN_STEERING_ANGLE = -22.0
-MAX_STEERING_ANGLE = 22.0
+K_p = 0.8
+MIN_STEERING_ANGLE = math.radians(-22.0)
+MAX_STEERING_ANGLE = math.radians(22.0)
 
 # Returns the difference between angle to next checkpoint
 # and heading of the car
 def get_angle_error(px,py,cx,cy,heading):
-  #heading = math.radians(heading)
-
   # Get length of vector
-  l = math.sqrt(pow((px-cx),2) + pow((py-cy),2))
-  cxx = l * math.cos(heading)
-  cyy = l * math.sin(heading)
-  pxx = abs(px-cx)
-  pyy = abs(py-cy)
-  dot_product = cxx*pxx + cyy*pyy
-  angle = math.acos(dot_product/(l*l))
+  length = math.sqrt(pow((px-cx),2) + pow((py-cy),2))
+  cxx = length * math.cos(heading)
+  cyy = length * math.sin(heading)
+  pxx = px-cx
+  pyy = py-cy
+  angle = math.atan2(pyy, pxx) - math.atan2(cyy, cxx)
+
+  rospy.loginfo("heading: %f, (%f, %f) -> (%f, %f), angle error is %f" % 
+                (heading, cx, cy, px, py, angle))
+  
+  if angle > math.pi:
+    angle -= 2*math.pi 
 
   return angle 
+
 
 # Given input, returns the distance between the circle arc (that the car is
 # believed to travel) and the checkpoint p.
 def is_on_track(px,py,cx,cy,heading,steering_angle):
+  global L
   #heading = math.radians(heading)
   #steering_angle = math.radians(steering_angle)
   R = L/(math.tan(steering_angle))
@@ -45,8 +51,8 @@ def update_steering_angle(px,py,cx,cy,heading,steering_angle):
   angle_error = get_angle_error(px,py,cx,cy,heading)
 
   # If angle error is less than something, set s_a to 0 
-  if abs(angle_error) < math.radians(5):
-    return 0.0
+  #if abs(angle_error) < math.radians(5):
+  #  return 0.0
 
   if abs(steering_angle) > 1:
     distance_error = is_on_track(px,py,cx,cy,heading,steering_angle)
@@ -72,7 +78,7 @@ def is_point_behind_front(x,y,car_x,car_y,heading):
   global L
 
   # Get point of car front
-  (front_x,front_y) = get_new_point(car_x,car_y,heading,L)
+  (front_x,front_y) = get_new_point(car_x,car_y,L,heading)
   # Calculate a point p1 that is to the left of front
   (p1x,p1y) = get_new_point(front_x,front_y,10,heading+math.pi/2)
   # Calculate a point p2 that is to the right of front
@@ -91,10 +97,9 @@ def is_point_behind_front(x,y,car_x,car_y,heading):
  
  
 # Returns a new point from angle and length of vector
-def get_new_point(x,y,L,heading):
-  global L
-  new_x = x + L * math.cos(heading)
-  new_y = y + L * math.sin(heading)
+def get_new_point(x,y, length, heading):
+  new_x = x + length * math.cos(heading)
+  new_y = y + length * math.sin(heading)
   return (new_x,new_y)
 
 
