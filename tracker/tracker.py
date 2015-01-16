@@ -7,6 +7,7 @@ from pygame.locals import *
 def main():
   pygame.init()
 
+  fpsClock = pygame.time.Clock()
   screen = pygame.display.set_mode((434,700))
   pygame.display.set_caption('Tracker')
   mapbg = pygame.image.load('map_700.jpg')
@@ -16,6 +17,8 @@ def main():
   blueColor = pygame.Color(0,0,255)
   whiteColor = pygame.Color(255,255,255)
 
+  font = pygame.font.SysFont("monospace", 15)
+  label = font.render("x=0, y=0", 1, (0,0,0))
   mouseX, mouseY = 0,0
   
   track = []
@@ -33,6 +36,8 @@ def main():
         sys.exit()
       if event.type == MOUSEMOTION:
         mouseX, mouseY = event.pos
+        pos = "x=" + str(float(mouseX)/100) + ", y=" + str(float(mouseY)/100)
+        label = font.render(pos, 1, (0,0,0))
       elif event.type == MOUSEBUTTONDOWN:
         mouseX, mouseY = event.pos
         track.append(event.pos)
@@ -46,7 +51,9 @@ def main():
     for point in track:
       pygame.draw.circle(screen, greenColor, (point), 6)
 
+    screen.blit(label, (150,110))
     pygame.display.update()
+    fpsClock.tick(30)
  
 if __name__ == '__main__':
   main()
