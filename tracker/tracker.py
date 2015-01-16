@@ -30,8 +30,6 @@ def main():
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
-        track_str = track_str[:-1] + "]"
-        print(track_str)
         pygame.quit()
         sys.exit()
       if event.type == MOUSEMOTION:
@@ -44,9 +42,17 @@ def main():
 
         mouseX = float(mouseX) / 0.7 
         mouseY = float(mouseY) / 0.7
-        newpos = "("+str(float(mouseX)/100) +",-"+ str(float(mouseY)/100)+"),"
+        newpos = "(%.2f,-%.2f)," % (mouseX/100, mouseY/100)
         track_str += newpos
-        print(newpos)
+        print(newpos[:-1])
+      elif event.type == KEYDOWN and event.key == K_c:
+        del track[:]
+        track_str = "wps = ["
+        print("Cleared track")
+
+      if event.type == KEYDOWN and event.key == K_SPACE:
+        track_str = track_str[:-1] + "]"
+        print(track_str)
 
     for point in track:
       pygame.draw.circle(screen, greenColor, (point), 6)
