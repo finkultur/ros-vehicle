@@ -1,5 +1,9 @@
 # Paints coordinates on the given track.
-# List of coordinates is returned on exit.
+# Click to create waypoint
+# Click on same point to remove
+# Press 'C' to clear
+# Press SPACE to print
+# Press 'S' to save image of track
 
 import pygame, sys
 from pygame.locals import *
@@ -22,46 +26,71 @@ def main():
   mouseX, mouseY = 0,0
   
   track = []
-  track_str = "wps = ["
+  track_id = 0
 
   while True:
-    screen.fill(whiteColor)
     screen.blit(mapbg, [0,0])
+
+    for point in track:
+      pygame.draw.circle(screen, greenColor, (point), 6)
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
         pygame.quit()
         sys.exit()
       if event.type == MOUSEMOTION:
-        mouseX, mouseY = event.pos
-        mouseX = float(mouseX)/100/0.7
-        mouseY = float(mouseY)/100/0.7
-        pos = "x=%.2f, y=%.2f" % (mouseX, mouseY)
+        x,y = event.pos
+        (x,y) = scale_point(x,y)
+        pos = "x=%.2f, y=%.2f" % (x,y)
         label = font.render(pos, 1, (0,0,0))
       elif event.type == MOUSEBUTTONDOWN:
-        mouseX, mouseY = event.pos
-        track.append(event.pos)
-
-        mouseX = float(mouseX) / 0.7 
-        mouseY = float(mouseY) / 0.7
-        newpos = "(%.2f,-%.2f)," % (mouseX/100, mouseY/100)
-        track_str += newpos
-        print(newpos[:-1])
+        x,y = event.pos
+        if not_in_track(track,x,y):
+          track.append(event.pos)
+          (x,y) = scale_point(x,y)
+          pos = "(%.2f,-%.2f)" % (x, y)
+          print(pos)
       elif event.type == KEYDOWN and event.key == K_c:
         del track[:]
-        track_str = "wps = ["
+        track_str = ""
         print("Cleared track")
-
-      if event.type == KEYDOWN and event.key == K_SPACE:
-        track_str = track_str[:-1] + "]"
-        print(track_str)
-
-    for point in track:
-      pygame.draw.circle(screen, greenColor, (point), 6)
+      elif event.type == KEYDOWN and event.key == K_SPACE:
+        print_track(track)
+      elif event.type == KEYDOWN and event.key == K_s:
+        filename = "track%i.jpg" % track_id
+        track_id += 1
+        pygame.image.save(screen, filename)
+        print("Saved image of track to " + filename)
 
     screen.blit(label, (150,110))
     pygame.display.update()
     fpsClock.tick(30)
+
+def not_in_track(track,x,y):
+  for x1,y1 in track:
+    if abs(x-x1) <= 6 and abs(y-y1) <= 6:
+      # Remove point
+      track.remove((x1,y1))
+      (x1,y1) = scale_point(x1,y1)
+      print("Removed (%.2f,%.2f) from track" % (x1,y1))
+      return False
+  return True
+
+def scale_point(x,y):
+  x = float(x) / 0.7 / 100
+  y = float(y) / 0.7 / 100
+  return (x,y)  
+
+def print_track(track):
+  if not track: 
+    print "There is no waypoints to be printed"
+  else:
+    track_str = "wps = ["
+    for (x,y) in track:
+      (x,y) = scale_point(x,y)
+      track_str += "(%.2f,-%.2f)," % (x,y)
+    print(track_str[:-1] + "]") 
+  
  
 if __name__ == '__main__':
   main()
