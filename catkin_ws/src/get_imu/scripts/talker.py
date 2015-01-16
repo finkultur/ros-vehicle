@@ -86,7 +86,7 @@ def parseIMUData(indata):
         
 if __name__ == '__main__':
     rospy.init_node('imu_talker', anonymous=True)
-    freq =  int(rospy.get_param('~freq', '50'))
+    freq =  int(rospy.get_param('~freq', '100'))
 
     try:
       talker(freq)
