@@ -1,6 +1,10 @@
 #include <math.h>
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include "geometry_msgs/Pose.h"
+#include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/Point.h"
+#include "geometry_msgs/Quaternion.h"
 #include "Position.hpp"
 #include "Kalman.hpp"
 #include <bldc_mc/MCValues.h>
@@ -19,6 +23,9 @@ Position* pos;
 ros::Publisher pos_publisher;
 ros::Subscriber bldc_listener;
 ros::Subscriber imu_listener;
+
+// Just for rviz
+ros::Publisher pose_publisher;
 
 bool recv_first_imu = false;
 double start_time;

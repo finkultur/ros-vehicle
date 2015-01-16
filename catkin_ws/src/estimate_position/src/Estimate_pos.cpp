@@ -56,6 +56,18 @@ int main(int argc, char **argv) {
   // Publishes topic "Position"
   pos_publisher = n.advertise<estimate_position::Position>("Position", 1000);
 
+  // Just for rviz
+  geometry_msgs::PoseStamped pose_stamped;
+  pose_stamped.header.frame_id = "map";
+  geometry_msgs::Pose pose;
+  geometry_msgs::Point point;
+  point.x = point.y = point.z = 0;
+  geometry_msgs::Quaternion orientation;
+  orientation.x = orientation.y = orientation.z = orientation.w = 0;
+  pose.orientation = orientation; 
+  // Publishes topic "pose" (just for rviz)
+  pose_publisher = n.advertise<geometry_msgs::PoseStamped>("/pose", 1000);
+
   // listens to mc_values and imu_data
   bldc_listener = n.subscribe("mc_values", 100, pos_callback);
   imu_listener = n.subscribe("imu_data", 100, imu_callback);
@@ -71,6 +83,14 @@ int main(int argc, char **argv) {
     pos_msg.heading = pos->get_heading();
     pos_msg.header.stamp = ros::Time::now();
     pos_publisher.publish(pos_msg);
+
+    // Published the position to rviz
+    pose_stamped.header.stamp = pos_msg.header.stamp;
+    point.x = pos_msg.x; 
+    point.y = pos_msg.y;
+    pose.position = point;
+    pose_stamped.pose = pose;
+    pose_publisher.publish(pose_stamped);
 
     loop_rate.sleep();
   }
