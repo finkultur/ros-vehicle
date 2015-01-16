@@ -2,7 +2,7 @@ import math
 import rospy
 
 L = 0.3
-K_p = 0.8
+K_p = 0.9
 MIN_STEERING_ANGLE = math.radians(-22.0)
 MAX_STEERING_ANGLE = math.radians(22.0)
 
@@ -78,7 +78,7 @@ def is_point_behind_front(x,y,car_x,car_y,heading):
   global L
 
   # Get point of car front
-  (front_x,front_y) = get_new_point(car_x,car_y,L,heading)
+  (front_x,front_y) = get_new_point(car_x,car_y,0.1,heading)
   # Calculate a point p1 that is to the left of front
   (p1x,p1y) = get_new_point(front_x,front_y,10,heading+math.pi/2)
   # Calculate a point p2 that is to the right of front
