@@ -32,14 +32,13 @@
 #define usb_lld_connect_bus(usbp)
 #define usb_lld_disconnect_bus(usbp)
 
-#define number_of_samples 3072 
-#define sample_freq 40 // hz
+#define number_of_samples 8192
+#define sample_freq 60 // Hz
 
 /* Virtual serial port over USB.*/
 SerialUSBDriver SDU1;
 
 static float mdps_per_digit = 8.75;
-
 
 typedef enum 
 {
@@ -273,8 +272,9 @@ int main(void) {
     initMag();
     chThdSleepMilliseconds(500);
 
-
     float gyro_drift[3];
+    // Sleep 1 second due to human interference
+    chThdSleepMilliseconds(1000);
     calibrate_gyro(gyro_drift);
 			
 	while(TRUE) {
