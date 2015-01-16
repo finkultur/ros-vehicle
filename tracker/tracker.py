@@ -34,7 +34,9 @@ def main():
         sys.exit()
       if event.type == MOUSEMOTION:
         mouseX, mouseY = event.pos
-        pos = "x=" + str(float(mouseX)/100) + ", y=" + str(float(mouseY)/100)
+        mouseX = float(mouseX)/100/0.7
+        mouseY = float(mouseY)/100/0.7
+        pos = "x=%.2f, y=%.2f" % (mouseX, mouseY)
         label = font.render(pos, 1, (0,0,0))
       elif event.type == MOUSEBUTTONDOWN:
         mouseX, mouseY = event.pos
