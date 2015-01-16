@@ -31,6 +31,7 @@ def main():
 
   font = pygame.font.SysFont("monospace", 15)
   label = font.render("x=0, y=0", 1, (0,0,0))
+  id_text = font.render("no waypoint here", 1, (0,0,0))
   mouseX, mouseY = 0,0
   
   track = []
@@ -54,6 +55,13 @@ def main():
         sys.exit()
       if event.type == MOUSEMOTION:
         x,y = event.pos
+        # If it is a waypoint here, print the number
+        if in_track(track,x,y):
+          wp_id = track.index(where_in_track(track,x,y))
+          where = "wp #%i" % wp_id
+          id_text = font.render(where, 1, (0,0,0))
+        else:
+          id_text = font.render("", 1, (0,0,0))
         (x,y) = scale_point(x,y)
         pos = "x=%.2f, y=%.2f" % (x,y)
         label = font.render(pos, 1, (0,0,0))
@@ -110,6 +118,7 @@ def main():
           print("Normal mode")
 
     screen.blit(label, (150,110))
+    screen.blit(id_text, (190,170))
     pygame.display.update()
     fpsClock.tick(30)
 
