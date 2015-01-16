@@ -354,11 +354,12 @@ int main(int argc, char **argv)
   
   int counter = 0;
   while (ros::ok()) {
-    // Get values every 50ms
-    if (counter % 50 == 0) {
+    // Get values every 20ms (50Hz)
+    if (counter % 20 == 0) {
       get_values();
     }
     // Send COMM_ALIVE every 50 ms
+    // (might not be needed since we're sending COMM_GET_VALUES)
     if (counter % 50 == 0) {
       send_alive();
     }
