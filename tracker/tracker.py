@@ -1,14 +1,17 @@
-# Paints coordinates on the given track.
-# Click to create waypoint
+# Paints coordinates on a track.
+#
+# Usage:
+# Click left mouse to create waypoint
 # Click on same point to remove
-# Press 'C' to clear
-# Press SPACE to print
+# Press 'C' to clear track
+# Press SPACE to print track
 # Press 'S' to save image of track
 # To insert a point between two points:
 #   Press 'R'
 #   Click on first point
 #   Click on second point
 #   Click to create waypoint
+#   (If no point is added, exit this mode by pressing R again)
 
 import pygame, sys
 from pygame.locals import *
@@ -56,7 +59,6 @@ def main():
         label = font.render(pos, 1, (0,0,0))
       elif event.type == MOUSEBUTTONDOWN:
         x,y = event.pos
-        
         # Add a point in between two other
         if state == "add_between":
           if not fst_point and in_track(track,x,y):
@@ -73,28 +75,32 @@ def main():
             state = "normal"
           else:
             print("There is no existing point there")
-        
-        # If not in track, add
+        # If not in track, create new waypoint
         elif not in_track(track,x,y):
           track.append(event.pos)
           (x,y) = scale_point(x,y)
           pos = "(%.2f,-%.2f)" % (x, y)
           print(pos)
+        # Else remove the existing waypoint
         else:
           x1,y1 = where_in_track(track,x,y)
           track.remove((x1,y1))
           print("Removed (%.2f,-%.2f)" % scale_point(x1,y1))
+      # Clear track
       elif event.type == KEYDOWN and event.key == K_c:
         del track[:]
         track_str = ""
         print("Cleared track")
+      # Print track
       elif event.type == KEYDOWN and event.key == K_SPACE:
         print_track(track)
+      # Save track to image
       elif event.type == KEYDOWN and event.key == K_s:
         filename = "track%i.jpg" % track_id
         track_id += 1
         pygame.image.save(screen, filename)
         print("Saved image of track to " + filename)
+      # Change state to "add waypoint in between"
       elif event.type == KEYDOWN and event.key == K_r:
         if state != "add_between":
           state = "add_between"
@@ -107,7 +113,6 @@ def main():
     pygame.display.update()
     fpsClock.tick(30)
 
-
 def in_track(track,x,y):
   for x1,y1 in track:
     if abs(x-x1) <= 6 and abs(y-y1) <= 6:
@@ -119,11 +124,6 @@ def where_in_track(track,x,y):
     if abs(x-x1) <= 6 and abs(y-y1) <= 6:
       return (x1,y1)
 
-def scale_point(x,y):
-  x = float(x) / 0.7 / 100
-  y = float(y) / 0.7 / 100
-  return (x,y)  
-
 def print_track(track):
   if not track: 
     print "There is no waypoints to be printed"
@@ -133,7 +133,12 @@ def print_track(track):
       (x,y) = scale_point(x,y)
       track_str += "(%.2f,-%.2f)," % (x,y)
     print(track_str[:-1] + "]") 
-  
+
+def scale_point(x,y):
+  x = float(x) / 0.7 / 100
+  y = float(y) / 0.7 / 100
+  return (x,y)
+
 def change_color(color):
   r,g,b = color
   r = (r+15) % 255
