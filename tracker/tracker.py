@@ -4,6 +4,11 @@
 # Press 'C' to clear
 # Press SPACE to print
 # Press 'S' to save image of track
+# To insert a point between two points:
+#   Press 'R'
+#   Click on first point
+#   Click on second point
+#   Click to create waypoint
 
 import pygame, sys
 from pygame.locals import *
@@ -27,12 +32,18 @@ def main():
   
   track = []
   track_id = 0
+  state = "normal"
+  fst_point = None 
+  snd_point = None
 
   while True:
     screen.blit(mapbg, [0,0])
 
+    color = (0,255,0)
     for point in track:
-      pygame.draw.circle(screen, greenColor, (point), 6)
+      color = change_color(color)
+      r,g,b = color
+      pygame.draw.circle(screen, pygame.Color(r,g,b), (point), 6)
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
@@ -45,11 +56,34 @@ def main():
         label = font.render(pos, 1, (0,0,0))
       elif event.type == MOUSEBUTTONDOWN:
         x,y = event.pos
-        if not_in_track(track,x,y):
+        
+        # Add a point in between two other
+        if state == "add_between":
+          if not fst_point and in_track(track,x,y):
+            fst_point = where_in_track(track,x,y)
+          elif not snd_point and in_track(track,x,y):
+            snd_point = where_in_track(track,x,y)
+          elif fst_point and snd_point and fst_point != snd_point:
+            track.insert(track.index(snd_point), event.pos)
+            (x,y) = scale_point(x,y)
+            pos = "(%.2f,-%.2f)" % (x, y)
+            print(pos)
+            fst_point = None
+            snd_point = None
+            state = "normal"
+          else:
+            print("There is no existing point there")
+        
+        # If not in track, add
+        elif not in_track(track,x,y):
           track.append(event.pos)
           (x,y) = scale_point(x,y)
           pos = "(%.2f,-%.2f)" % (x, y)
           print(pos)
+        else:
+          x1,y1 = where_in_track(track,x,y)
+          track.remove((x1,y1))
+          print("Removed (%.2f,-%.2f)" % scale_point(x1,y1))
       elif event.type == KEYDOWN and event.key == K_c:
         del track[:]
         track_str = ""
@@ -61,20 +95,29 @@ def main():
         track_id += 1
         pygame.image.save(screen, filename)
         print("Saved image of track to " + filename)
+      elif event.type == KEYDOWN and event.key == K_r:
+        if state != "add_between":
+          state = "add_between"
+          print("Click on two points then on where to put the new one") 
+        else: 
+          state = "normal"
+          print("Normal mode")
 
     screen.blit(label, (150,110))
     pygame.display.update()
     fpsClock.tick(30)
 
-def not_in_track(track,x,y):
+
+def in_track(track,x,y):
   for x1,y1 in track:
     if abs(x-x1) <= 6 and abs(y-y1) <= 6:
-      # Remove point
-      track.remove((x1,y1))
-      (x1,y1) = scale_point(x1,y1)
-      print("Removed (%.2f,%.2f) from track" % (x1,y1))
-      return False
-  return True
+      return True
+  return False
+
+def where_in_track(track,x,y):
+  for x1,y1 in track:
+    if abs(x-x1) <= 6 and abs(y-y1) <= 6:
+      return (x1,y1)
 
 def scale_point(x,y):
   x = float(x) / 0.7 / 100
@@ -91,6 +134,11 @@ def print_track(track):
       track_str += "(%.2f,-%.2f)," % (x,y)
     print(track_str[:-1] + "]") 
   
+def change_color(color):
+  r,g,b = color
+  r = (r+15) % 255
+  g = (g-15) % 255
+  return (r,g,b)
  
 if __name__ == '__main__':
   main()
