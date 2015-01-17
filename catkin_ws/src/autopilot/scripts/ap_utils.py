@@ -3,8 +3,13 @@ import rospy
 
 L = 0.3
 K_p = 0.9
+K_i = 0.0
+K_d = 0.0
+prev_error = 0
+i_term = 0
 MIN_STEERING_ANGLE = math.radians(-22.0)
 MAX_STEERING_ANGLE = math.radians(22.0)
+sampling_freq = 200 # We get a new Position every 5 ms
 
 # Returns the difference between angle to next checkpoint
 # and heading of the car
@@ -48,12 +53,14 @@ def is_on_track(px,py,cx,cy,heading,steering_angle):
 #        heading = current heading of car (not steering angle)
 # output: a new heading in degrees
 def update_steering_angle(px,py,cx,cy,heading,steering_angle):
+  global i_term, prev_error
   angle_error = get_angle_error(px,py,cx,cy,heading)
 
   # If angle error is less than something, set s_a to 0 
   #if abs(angle_error) < math.radians(5):
   #  return 0.0
 
+  """ TODO: Maybe use this stuff
   if abs(steering_angle) > 1:
     distance_error = is_on_track(px,py,cx,cy,heading,steering_angle)
     # If is_on_track returns a positive number,
@@ -61,24 +68,32 @@ def update_steering_angle(px,py,cx,cy,heading,steering_angle):
     if abs(distance_error) < 0.1:
       # Do nothing
       pass
-    """
     elif distance_error > 0:
       # decrease steering_angle
       steering_angle *= 0.9
     elif (distance_error < 0):
       # increase steering angle
       steering_angle *= 1.1
-    """
-  steering_angle = angle_error * K_p 
+  """
+
+  p_term = angle_error * K_p
+  i_term += angle_error * (K_i * sampling_freq) # Is this right?
+  d_term = (error - prev_error) * (K_d / sampling_freq)
+
+  steering_angle = p_term + i_term + d_term
+  prev_angle_error = angle_error
 
   return max(MIN_STEERING_ANGLE, min(steering_angle, MAX_STEERING_ANGLE))
 
 
-def is_point_behind_front(x,y,car_x,car_y,heading):
-  global L
+def is_point_behind(x,y,car_x,car_y,heading):
+  # This is the distance between the rear axis and the imaginary line which the
+  # given point is or is not behind. E.g., if equal to 0.3 [m], every point
+  # behind the front axis is said to be behind.
+  d = 0.1
 
   # Get point of car front
-  (front_x,front_y) = get_new_point(car_x,car_y,0.1,heading)
+  (front_x,front_y) = get_new_point(car_x,car_y,d,heading)
   # Calculate a point p1 that is to the left of front
   (p1x,p1y) = get_new_point(front_x,front_y,10,heading+math.pi/2)
   # Calculate a point p2 that is to the right of front
@@ -86,9 +101,9 @@ def is_point_behind_front(x,y,car_x,car_y,heading):
 
   # This catches some corner-cases due to rounding errors
   if heading == math.pi:
-    return car_x-L < x 
+    return car_x-d < x 
   elif heading == 0:
-    return car_x+L > x 
+    return car_x+d > x 
 
   if (heading < math.pi):
     return is_point_behind_line(x,y,p1x,p1y,p2x,p2y)
@@ -116,12 +131,4 @@ def is_point_behind_line(x,y,px1,py1,px2,py2):
     return False
   else:
     return False
-
-
-# This is needed since all image viewers has (0,0) in top left corner
-# [(1,2),(3,4)] => [(1,-2),(3,-4)]
-def negate_y(array):
-  for i, (x,y) in enumerate(array):
-     array[i] = (x,-y)
-  return array
 
