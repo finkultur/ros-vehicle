@@ -12,18 +12,26 @@
 #   Start adding waypoints (still holding shift)
 #   Release shift to go back to normal
 
+import rospy, roslib
+from estimate_position.msg import Position
+
 import pygame, sys
 from pygame.locals import *
 from time import gmtime, strftime
 from ast import literal_eval
 
+kilroys = []
+
 def main():
+  ros_init()
+
   pygame.init()
   fpsClock = pygame.time.Clock()
   screen = pygame.display.set_mode((434,700))
   pygame.display.set_caption('Tracker')
   mapbg = pygame.image.load('map_700.jpg')
   font = pygame.font.SysFont("monospace", 15)
+  black = pygame.Color(0,0,0)
   label = font.render("x=0, y=0", 1, (0,0,0))
   id_text = font.render("-", 1, (0,0,0))
   track,g_track = read_track()
@@ -111,6 +119,9 @@ def main():
           state = "normal"
           print("Normal mode")
 
+    # Paint lines between all received positions
+    #pygame.draw.lines(screen, black, False, kilroys, width=2)
+
     screen.blit(label, (150,540))
     screen.blit(id_text, (190,560))
     pygame.display.update()
@@ -170,6 +181,16 @@ def change_color(color):
   color.r = (color.r+15) % 255
   color.g = (color.g-15) % 255
   return color
+
+def callback_position(pos):
+  global kilroys
+  kilroys.append((pos.x,pos.y))
+
+def ros_init():
+  rospy.init_node("tracker", anonymous=True)
+  # Subscribe to Position
+  rospy.Subscriber("Position", Position, callback_position)
+  rospy.spin()
 
 if __name__ == '__main__':
   main()
