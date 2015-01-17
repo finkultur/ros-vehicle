@@ -15,27 +15,19 @@
 
 import pygame, sys
 from pygame.locals import *
+from time import gmtime, strftime
+from ast import literal_eval
 
 def main():
   pygame.init()
-
   fpsClock = pygame.time.Clock()
   screen = pygame.display.set_mode((434,700))
   pygame.display.set_caption('Tracker')
   mapbg = pygame.image.load('map_700.jpg')
-
-  redColor = pygame.Color(255,0,0)
-  greenColor = pygame.Color(0,255,0)
-  blueColor = pygame.Color(0,0,255)
-  whiteColor = pygame.Color(255,255,255)
-
   font = pygame.font.SysFont("monospace", 15)
   label = font.render("x=0, y=0", 1, (0,0,0))
   id_text = font.render("no waypoint here", 1, (0,0,0))
-  mouseX, mouseY = 0,0
-  
-  track = []
-  track_id = 0
+  track = read_track()
   state = "normal"
   fst_point = None 
   snd_point = None
@@ -43,11 +35,11 @@ def main():
   while True:
     screen.blit(mapbg, [0,0])
 
-    color = (0,255,0)
+    # Draw waypoints with alternating colors
+    color = pygame.Color(0,255,0)
     for point in track:
-      color = change_color(color)
-      r,g,b = color
-      pygame.draw.circle(screen, pygame.Color(r,g,b), (point), 6)
+      color = change_color2(color)
+      pygame.draw.circle(screen, color, (point), 6)
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
@@ -101,13 +93,15 @@ def main():
         print("Cleared track")
       # Print track
       elif event.type == KEYDOWN and event.key == K_SPACE:
-        print_track(track)
-      # Save track to image
+        print("wps = " + track_to_string(track))
+      # Save track to image and textfile (.track)
       elif event.type == KEYDOWN and event.key == K_s:
-        filename = "track%i.jpg" % track_id
-        track_id += 1
-        pygame.image.save(screen, filename)
-        print("Saved image of track to " + filename)
+        trackname = strftime("track_%Y-%m-%d-%H:%M:%S", gmtime())
+        text_file = open(trackname + ".track", "w")
+        text_file.write("%s" % track_to_string(track))
+        text_file.close()
+        pygame.image.save(screen, trackname + ".jpg")
+        print("Saved track to " + trackname + ".[jpg/track]")
       # Change state to "add waypoint in between"
       elif event.type == KEYDOWN and event.key == K_r:
         if state != "add_between":
@@ -122,6 +116,18 @@ def main():
     pygame.display.update()
     fpsClock.tick(30)
 
+def read_track():
+  if len(sys.argv) == 2:
+    with open (sys.argv[1], "r") as track_file:
+      track = literal_eval(track_file.read())
+    print(track[0][0])
+    if not track or type(track[0]) is not tuple or type(track[0][0]) is not float:
+      track = []
+    else:
+      for i, (x,y) in enumerate(track):
+        track[i] = rescale_point(x,y)
+  return track
+
 def in_track(track,x,y):
   for x1,y1 in track:
     if abs(x-x1) <= 6 and abs(y-y1) <= 6:
@@ -133,19 +139,24 @@ def where_in_track(track,x,y):
     if abs(x-x1) <= 6 and abs(y-y1) <= 6:
       return (x1,y1)
 
-def print_track(track):
+def track_to_string(track):
   if not track: 
-    print "There is no waypoints to be printed"
+    return "There is no waypoints to be printed"
   else:
-    track_str = "wps = ["
+    track_str = "["
     for (x,y) in track:
       (x,y) = scale_point(x,y)
       track_str += "(%.2f,-%.2f)," % (x,y)
-    print(track_str[:-1] + "]") 
+    return track_str[:-1] + "]"
 
 def scale_point(x,y):
   x = float(x) / 0.7 / 100
   y = float(y) / 0.7 / 100
+  return (x,y)
+
+def rescale_point(x,y):
+  x = int(x * 70)
+  y = -int(y * 70)
   return (x,y)
 
 def change_color(color):
@@ -153,6 +164,11 @@ def change_color(color):
   r = (r+15) % 255
   g = (g-15) % 255
   return (r,g,b)
+
+def change_color2(color):
+  color.r = (color.r+15) % 255
+  color.g = (color.g-15) % 255
+  return color
  
 if __name__ == '__main__':
   main()
