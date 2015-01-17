@@ -1,4 +1,4 @@
-# Paints coordinates on a track.
+# Paints waypoints on a track.
 #
 # Usage:
 # Click left mouse to create waypoint
@@ -6,12 +6,11 @@
 # Press 'C' to clear track
 # Press SPACE to print track
 # Press 'S' to save image of track
-# To insert a point between two points:
-#   Press 'R'
-#   Click on first point
-#   Click on second point
-#   Click to create waypoint
-#   (If no point is added, exit this mode by pressing R again)
+# To insert point(s) in between:
+#   Hold shift
+#   Click starting point (an existing waypoint)
+#   Start adding waypoints (still holding shift)
+#   Release shift to go back to normal
 
 import pygame, sys
 from pygame.locals import *
@@ -28,9 +27,8 @@ def main():
   label = font.render("x=0, y=0", 1, (0,0,0))
   id_text = font.render("-", 1, (0,0,0))
   track,g_track = read_track()
-  state = "normal"
-  fst_point = None 
-  snd_point = None
+  shift_mode = False
+  prev_pressed = None
 
   while True:
     screen.blit(mapbg, [0,0])
@@ -41,6 +39,13 @@ def main():
       color = change_color(color)
       pygame.draw.circle(screen, color, (point), 6)
 
+    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+      shift_mode = True
+    else:
+      shift_mode = False
+      prev_pressed = None
+
+    # Event loop 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
         pygame.quit()
@@ -56,27 +61,21 @@ def main():
           id_text = font.render(where, 1, (0,0,0))
         else:
           id_text = font.render("-", 1, (0,0,0))
+      # Shift-mode 
+      elif event.type == MOUSEBUTTONDOWN and shift_mode:
+        m_x,m_y = event.pos
+        if not prev_pressed:
+          if in_track(g_track,m_x,m_y):
+            prev_pressed = where_in_track(g_track,m_x,m_y)[0]
+          else:
+            print("You need to select an existing starting point")
+        else:
+          add_point(prev_pressed+1,m_x,m_y,track,g_track)
+          prev_pressed += 1 
       elif event.type == MOUSEBUTTONDOWN:
         m_x,m_y = event.pos
-        # Add a point in between two other
-        if state == "add_between":
-          if not fst_point and in_track(g_track,m_x,m_y):
-            fst_point = where_in_track(g_track,m_x,m_y)
-          elif not snd_point and in_track(g_track,m_x,m_y):
-            snd_point = where_in_track(g_track,m_x,m_y)
-          elif fst_point and snd_point and fst_point != snd_point and \
-               (abs(fst_point[0] - snd_point[0])) == 1 :
-            x,y = scale_point(m_x,m_y)
-            track.insert(snd_point[0], (x,y))
-            g_track.insert(snd_point[0], (m_x,m_y))
-            print("(%.2f,%.2f)" % (x,y))
-            fst_point = None
-            snd_point = None
-            state = "normal"
-          else:
-            print("You're doing it wrong, press 'R' for normal mode")
         # If not in track, create new waypoint
-        elif not in_track(g_track,m_x,m_y):
+        if not in_track(g_track,m_x,m_y):
           track.append((x,y))
           g_track.append((m_x,m_y))
           print("(%.2f,%.2f)" % (x,y))
@@ -96,7 +95,7 @@ def main():
       elif event.type == KEYDOWN and event.key == K_SPACE:
         print("wps = " + track_to_string(track))
       # Save track to image and textfile (.track)
-      elif event.type == KEYDOWN and event.key == K_s:
+      elif event.type == KEYDOWN and event.key == K_s and track:
         trackname = strftime("track_%Y-%m-%d-%H:%M:%S", gmtime())
         text_file = open(trackname + ".track", "w")
         text_file.write("%s" % track_to_string(track))
@@ -130,6 +129,12 @@ def read_track():
     return (track, g_track)
   else:
     return ([],[])
+
+def add_point(index,m_x,m_y,track,g_track):
+  (x,y) = scale_point(m_x,m_y)
+  track.insert(index, (x,y))
+  g_track.insert(index, (m_x,m_y))
+  print("(%.2f,%.2f)" % (x,y))
 
 def in_track(track,x,y):
   for x1,y1 in track:
@@ -165,6 +170,6 @@ def change_color(color):
   color.r = (color.r+15) % 255
   color.g = (color.g-15) % 255
   return color
- 
+
 if __name__ == '__main__':
   main()
