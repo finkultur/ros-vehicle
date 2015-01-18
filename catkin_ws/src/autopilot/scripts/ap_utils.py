@@ -77,11 +77,13 @@ def update_steering_angle(px,py,cx,cy,heading,steering_angle):
   """
 
   p_term = angle_error * K_p
-  i_term += angle_error * (K_i * sampling_freq) # Is this right?
-  d_term = (error - prev_error) * (K_d / sampling_freq)
+  i_term += (angle_error / sampling_freq) * K_i # Is this right?
+  d_term = ((error - prev_error) / sampling_freq) * K_d
 
   steering_angle = p_term + i_term + d_term
   prev_angle_error = angle_error
+
+
 
   return max(MIN_STEERING_ANGLE, min(steering_angle, MAX_STEERING_ANGLE))
 
