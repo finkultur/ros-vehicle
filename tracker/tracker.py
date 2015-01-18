@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # Paints waypoints on a track.
 #
 # Usage:
@@ -15,14 +17,18 @@
 import rospy, roslib
 from estimate_position.msg import Position
 
-import pygame, sys
+import pygame, sys, threading
 from pygame.locals import *
 from time import gmtime, strftime
 from ast import literal_eval
 
 kilroys = []
+global lock
 
 def main():
+  global lock,kilroys
+
+  lock = threading.Lock()
   ros_init()
 
   pygame.init()
@@ -98,7 +104,15 @@ def main():
         del track[:]
         del g_track[:]
         track_str = ""
-        print("Cleared track")
+        print("Cleared waypoints")
+      # Clear received positions
+      elif event.type == KEYDOWN and event.key == K_p:
+        lock.acquire()
+        try:
+          del kilroys[:]
+        finally:
+          lock.release()
+        print("Cleared received positions")
       # Print track
       elif event.type == KEYDOWN and event.key == K_SPACE:
         print("wps = " + track_to_string(track))
@@ -178,19 +192,23 @@ def rescale_point(x,y):
   return (x,y)
 
 def change_color(color):
-  color.r = (color.r+15) % 255
+  color.r = (color.r+10) % 255
   color.g = (color.g-15) % 255
   return color
 
 def callback_position(pos):
-  global kilroys
-  kilroys.append((pos.x,pos.y))
+  global kilroys, lock
+  lock.acquire()
+  try:
+    kilroys.append((pos.x,pos.y))
+  finally:
+    lock.release()
 
 def ros_init():
   rospy.init_node("tracker", anonymous=True)
   # Subscribe to Position
   rospy.Subscriber("Position", Position, callback_position)
-  rospy.spin()
 
 if __name__ == '__main__':
   main()
+
