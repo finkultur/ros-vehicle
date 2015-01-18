@@ -15,20 +15,21 @@ void callback(const ackermann_msgs::AckermannDrive::ConstPtr& msg) {
 
 void callback_uss(const sensor_msgs::Range::ConstPtr& msg, 
                   const string& sensor_name) {
+  
   if (sensor_name == "us_sensor0") {
     us_sensor0 = msg->range;
   } else if (sensor_name == "us_sensor1") {
     us_sensor1 = msg->range;
   }
 
-  if (!emergency && (us_sensor0 < 0.7 || us_sensor1 < 0.7)) {
+  if (!emergency && (us_sensor0 < 0.5 || us_sensor1 < 0.5)) {
+    ROS_INFO("EMERGENCY!\n");
     emergency = true;
     prev_speed = current_speed;
-    //set_rpm(0);
-    //set_duty(0);
-  } else if (emergency && (us_sensor0 >= 0.7 && us_sensor1 >= 0.7)) {
+    set_duty(0);
+  } else if (emergency && (us_sensor0 >= 0.5 && us_sensor1 >= 0.5)) {
     emergency = false;
-    //set_rpm(prev_speed);
+    set_rpm(prev_speed);
   }
 } 
 
@@ -58,12 +59,17 @@ int set_rpm(float speed) {
   uint8_t cmd[len] = {COMM_SET_RPM, 0x00, 0x00, 0x00, 0x00};
   int32_t rpm = -int(speed_to_rpm(speed));
 
+  // If something is in front of the vehicle, only allow reverse
+  if (emergency && speed > 0) {
+    rpm = 0;
+  }
+
   cmd[1] = rpm >> 24;
   cmd[2] = rpm >> 16;
   cmd[3] = rpm >> 8;
   cmd[4] = rpm;
 
-  cout << "RPM to be set: " << std::dec << rpm << "mA" << endl;
+  cout << "RPM to be set: " << std::dec << rpm << endl;
   printf("SET_RPM command to be sent: %02x, %02x, %02x, %02x, %02x\n",
           cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);
 
@@ -310,7 +316,6 @@ void process_packet(const unsigned char *data, int len) {
       // This data is not from the car
       msg.current_steering_angle = current_steering_angle;
       msg.current_speed = current_speed;
-      ROS_INFO("Publishing MCValues!\n");
       mc_values_pub.publish(msg);
       break;
 
