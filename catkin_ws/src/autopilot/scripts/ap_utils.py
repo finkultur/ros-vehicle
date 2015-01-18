@@ -2,9 +2,9 @@ import math
 import rospy
 
 L = 0.3
-K_p = 0.9
+K_p = 1.2
 K_i = 0.0
-K_d = 0.0
+K_d = 0.2
 prev_error = 0
 i_term = 0
 MIN_STEERING_ANGLE = math.radians(-22.0)
@@ -24,7 +24,8 @@ def get_angle_error(px,py,cx,cy,heading):
 
   rospy.loginfo("heading: %f, (%f, %f) -> (%f, %f), angle error is %f" % 
                 (heading, cx, cy, px, py, angle))
-  
+
+  angle = angle % (2*math.pi)
   if angle > math.pi:
     angle -= 2*math.pi 
 
@@ -78,12 +79,10 @@ def update_steering_angle(px,py,cx,cy,heading,steering_angle):
 
   p_term = angle_error * K_p
   i_term += (angle_error / sampling_freq) * K_i # Is this right?
-  d_term = ((error - prev_error) / sampling_freq) * K_d
+  d_term = ((angle_error - prev_error) / sampling_freq) * K_d
 
   steering_angle = p_term + i_term + d_term
   prev_angle_error = angle_error
-
-
 
   return max(MIN_STEERING_ANGLE, min(steering_angle, MAX_STEERING_ANGLE))
 
