@@ -57,6 +57,7 @@ int main(int argc, char **argv) {
   pos_publisher = n.advertise<estimate_position::Position>("Position", 1000);
 
   // Just for rviz
+  /*
   geometry_msgs::PoseStamped pose_stamped;
   pose_stamped.header.frame_id = "map";
   geometry_msgs::Pose pose;
@@ -67,6 +68,7 @@ int main(int argc, char **argv) {
   pose.orientation = orientation; 
   // Publishes topic "pose" (just for rviz)
   pose_publisher = n.advertise<geometry_msgs::PoseStamped>("/pose", 1000);
+  */
 
   // listens to mc_values and imu_data
   bldc_listener = n.subscribe("mc_values", 100, pos_callback);
@@ -84,6 +86,7 @@ int main(int argc, char **argv) {
     pos_msg.header.stamp = ros::Time::now();
     pos_publisher.publish(pos_msg);
 
+    /*
     // Published the position to rviz
     pose_stamped.header.stamp = pos_msg.header.stamp;
     point.x = pos_msg.x; 
@@ -91,6 +94,7 @@ int main(int argc, char **argv) {
     pose.position = point;
     pose_stamped.pose = pose;
     pose_publisher.publish(pose_stamped);
+    */
 
     loop_rate.sleep();
   }
