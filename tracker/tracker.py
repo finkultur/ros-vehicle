@@ -23,7 +23,6 @@ from time import gmtime, strftime
 from ast import literal_eval
 
 kilroys = []
-global lock
 
 def main():
   global lock,kilroys
@@ -51,7 +50,13 @@ def main():
     color = pygame.Color(0,255,0)
     for point in g_track:
       color = change_color(color)
-      pygame.draw.circle(screen, color, (point), 6)
+      pygame.draw.circle(screen, color, point, 6)
+
+    # Draw received positions
+    if len(kilroys) > 1:
+      #pygame.draw.lines(screen, black, False, kilroys, 2)
+      for point in kilroys:
+        pygame.draw.circle(screen, black, point, 1)
 
     if pygame.key.get_mods() & pygame.KMOD_SHIFT:
       shift_mode = True
@@ -123,18 +128,7 @@ def main():
         text_file.write("%s" % track_to_string(track))
         text_file.close()
         pygame.image.save(screen, trackname + ".jpg")
-        print("Saved track to " + trackname + ".[jpg/track]")
-      # Change state to "add waypoint in between"
-      elif event.type == KEYDOWN and event.key == K_r:
-        if state != "add_between":
-          state = "add_between"
-          print("Click on two points then on where to put the new one") 
-        else: 
-          state = "normal"
-          print("Normal mode")
-
-    # Paint lines between all received positions
-    #pygame.draw.lines(screen, black, False, kilroys, width=2)
+        print("# Saved track to " + trackname + ".[jpg/track]")
 
     screen.blit(label, (150,540))
     screen.blit(id_text, (190,560))
@@ -198,9 +192,11 @@ def change_color(color):
 
 def callback_position(pos):
   global kilroys, lock
+  print("Got a position! x=%f, y=%f, heading=%f" % (pos.x,pos.y,pos.heading))
+  x,y = rescale_point(pos.x,pos.y)
   lock.acquire()
   try:
-    kilroys.append((pos.x,pos.y))
+    kilroys.append((x,y))
   finally:
     lock.release()
 
