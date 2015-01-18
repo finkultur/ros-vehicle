@@ -4,7 +4,7 @@
   <node pkg="get_imu" type="talker.py" name="imu_data">
   </node>
   <node pkg="bldc_mc" type="bldc_mc" name="bldc_mc">
-    <param name="enable_uss" value="false" />
+    <param name="enable_uss" value="true" />
   </node>
   <node pkg="estimate_position" type="estimate_position" name="pos_est">
     <param name="x" value="2.015" />
