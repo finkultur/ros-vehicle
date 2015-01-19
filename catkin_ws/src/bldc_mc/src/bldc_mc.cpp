@@ -1,3 +1,20 @@
+/*
+  Copyright 2014-2015 Viktor Nilsson and Herman Fransson
+  Copyright 2012-2014 Benjamin Vedder benjamin@vedder.se
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "bldc_mc.hpp"
 
 using namespace std;
@@ -363,7 +380,7 @@ int main(int argc, char **argv)
     if (counter % 20 == 0) {
       get_values();
     }
-    // Send COMM_ALIVE every 50 ms
+    // Send COMM_ALIVE every 50 ms (20Hz)
     // (might not be needed since we're sending COMM_GET_VALUES)
     if (counter % 50 == 0) {
       send_alive();
