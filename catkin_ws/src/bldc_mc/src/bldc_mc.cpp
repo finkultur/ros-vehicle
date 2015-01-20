@@ -30,21 +30,27 @@ void callback(const ackermann_msgs::AckermannDrive::ConstPtr& msg) {
   set_steering(msg->steering_angle, msg->steering_angle_velocity);
 }
 
+/*
+  Callback function for the ultrasonic sensors.
+  If a sensor reports a range less than x, the car is stopped and not
+  restarted until both sensors report a range greater than x.
+*/
 void callback_uss(const sensor_msgs::Range::ConstPtr& msg, 
                   const string& sensor_name) {
-  
   if (sensor_name == "us_sensor0") {
     us_sensor0 = msg->range;
   } else if (sensor_name == "us_sensor1") {
     us_sensor1 = msg->range;
   }
 
-  if (!emergency && (us_sensor0 < 0.5 || us_sensor1 < 0.5)) {
+  if (current_speed > 0 && !emergency && 
+      (us_sensor0 < USS_RANGE || us_sensor1 < USS_RANGE)) {
     ROS_INFO("EMERGENCY!\n");
     emergency = true;
     prev_speed = current_speed;
+    current_speed = 0;
     set_duty(0);
-  } else if (emergency && (us_sensor0 >= 0.5 && us_sensor1 >= 0.5)) {
+  } else if (emergency && (us_sensor0 >= USS_RANGE && us_sensor1 >= USS_RANGE)) {
     emergency = false;
     set_rpm(prev_speed);
   }
@@ -95,15 +101,16 @@ int set_rpm(float speed) {
 }
 
 /*
-  Converts a speed to an RPM.
+  Converts a speed value that is between [-1.0,1.0] to an RPM.
 */
 int speed_to_rpm(float speed) {
-  float rpm;
-  int MAX_RPM = 15000;
-  if (fabsf(speed) < 0.15) {
+  int rpm;
+  rpm = speed*MAX_RPM;
+  if (abs(rpm) < MIN_RPM) {
     rpm = 0;
-  } else {
-    rpm = speed*MAX_RPM;
+  }
+  if (abs(rpm) > MAX_RPM) {
+    rpm = MAX_RPM;
   }
   return rpm;
 }
@@ -140,11 +147,12 @@ int set_speed(float speed) {
 */
 float speed_to_current(float speed) {
   float current;
-  int MAX_CURRENT = 6; // Max speed in current
-  if (fabsf(speed) < 0.2) {
+  current = speed*MAX_CURRENT;
+  if (fabsf(current) < MIN_CURRENT) {
     current = 0;
-  } else {
-    current = speed*MAX_CURRENT;
+  }
+  if (fabsf(current) > MAX_CURRENT) {
+    current = MAX_CURRENT;
   }
   return current;
 }
@@ -183,8 +191,8 @@ int set_steering(float angle, float angle_velocity) {
 int current_brake(int32_t brake_current) {
   const int len = 5; // cmd is 5 bytes long
   /*
-  cmd[0]: what command (0x03 == COMM_SET_CURRENT_BRAKE
-  cmd[1-4]: current in mA
+    cmd[0]: what command (0x03 == COMM_SET_CURRENT_BRAKE
+    cmd[1-4]: current in mA
   */
   uint8_t cmd[len] = {COMM_SET_CURRENT_BRAKE, 0x00, 0x00, 0x00, 0x00};
   cmd[1] = brake_current >> 24;
@@ -206,8 +214,8 @@ int current_brake(int32_t brake_current) {
 int set_duty(int32_t duty) {
   const int len = 5; // cmd is 5 bytes long
   /*
-  cmd[0]: what command (0x01 == COMM_SET_DUTY
-  cmd[1-4]: duty in ?
+    cmd[0]: what command (0x01 == COMM_SET_DUTY
+    cmd[1-4]: duty in ?
   */
   uint8_t cmd[len] = {COMM_SET_DUTY, 0x00, 0x00, 0x00, 0x00};
   cmd[1] = duty >> 24;
@@ -222,12 +230,19 @@ int set_duty(int32_t duty) {
   return send_packet(cmd, len);
 }
 
+/*
+  Requests motor controller data from the car.
+*/
 void get_values() {
   unsigned char cmd[1] = {0x00}; // 0x00 == COMM_GET_VALUES
   send_packet(cmd, 1);
   recv_packet();
 }
 
+/*
+  Sends an "I'm alive"-message to the car.
+  The car is automatically stopped if it has not received anything for 500ms.
+*/
 void send_alive() {
   uint8_t cmd[1] = {COMM_ALIVE}; // 0x12 == COMM_ALIVE
   send_packet(cmd, 1);
@@ -258,6 +273,10 @@ int send_packet(const unsigned char *data, int len) {
   return 0;
 }
 
+/*
+  Receives a packet from the motor controller over serial.
+  From bldc-tool/packetinterface.cpp.
+*/
 int recv_packet() {
   std::stringstream ss;
 
@@ -294,6 +313,9 @@ int recv_packet() {
   return 0;
 }
 
+/*
+  Processes a packet from the motor controller.
+*/
 void process_packet(const unsigned char *data, int len) {
   if (!len) {
     return;
@@ -376,13 +398,13 @@ int main(int argc, char **argv)
   
   int counter = 0;
   while (ros::ok()) {
-    // Get values every 20ms (50Hz)
-    if (counter % 20 == 0) {
+    // Get values every x ms
+    if (counter % GET_VALUES_INTERVAL == 0) {
       get_values();
     }
-    // Send COMM_ALIVE every 50 ms (20Hz)
+    // Send COMM_ALIVE every x ms
     // (might not be needed since we're sending COMM_GET_VALUES)
-    if (counter % 50 == 0) {
+    if (counter % SEND_ALIVE_INTERVAL == 0) {
       send_alive();
     }
     counter = (counter+1)%1000;

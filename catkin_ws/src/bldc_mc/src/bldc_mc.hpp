@@ -14,7 +14,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "sensor_msgs/Range.h"
@@ -27,6 +26,14 @@
 #include "datatypes.h"
 #include "Serial.hpp"
 #include "utils.hpp"
+
+#define USS_RANGE 0.5
+#define MIN_CURRENT 1.2
+#define MAX_CURRENT 6
+#define MIN_RPM 3500
+#define MAX_RPM 15000
+#define GET_VALUES_INTERVAL 20
+#define SEND_ALIVE_INTERVAL 50
 
 void callback_uss(const sensor_msgs::Range::ConstPtr& msg, const std::string &sensor_name);
 int init_mc();
@@ -51,3 +58,4 @@ float prev_speed;
 float us_sensor0;
 float us_sensor1;
 bool emergency;
+
