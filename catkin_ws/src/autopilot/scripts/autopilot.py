@@ -95,7 +95,7 @@ def callback_position(pos, pub):
 
 def autopilot():
   # Sleep before starting. If parameter not set, default to 5 seconds.
-  time.sleep(int(rospy.get_param('wait_time', '5')))
+  time.sleep(int(rospy.get_param('Autopilot/wait_time', 5)))
 
   rospy.init_node("autopilot", anonymous=True)
   pub = rospy.Publisher('mc_cmds', AckermannDrive, queue_size=10)

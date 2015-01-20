@@ -40,9 +40,9 @@ int main(int argc, char **argv) {
   // Get parameters, set default values (0,0,0) if not found
   double x, y;
   double heading;
-  n.param<double>("x", x, 2.015);
-  n.param<double>("y", y, -0.585);
-  n.param<double>("heading", heading, 0);
+  n.param<double>("pos_est/x", x, 2.015);
+  n.param<double>("pos_est/y", y, -0.585);
+  n.param<double>("pos_est/heading", heading, 0);
   /*n.getParam("x", x);
   n.getParam("y", y);
   n.getParam("heading", heading);*/
