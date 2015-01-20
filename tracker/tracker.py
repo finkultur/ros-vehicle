@@ -1,23 +1,56 @@
 #!/usr/bin/env python
+# Software License Agreement (BSD License)
 #
-# Paints waypoints on a track.
+# Copyright (c) 2014, Viktor Nilsson.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of Willow Garage, Inc. nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+#
+# tracker.py: Paints waypoints on a track.
 #
 # Usage:
 # Click left mouse to create waypoint
 # Click on same point to remove
 # Press 'C' to clear track
-# Press SPACE to print track
+# Press 'P' to clear received Positions (if plotting enabled)
+# Press SPACE to print track to console
 # Press 'S' to save image of track
 # To insert point(s) in between:
 #   Hold shift
 #   Click starting point (an existing waypoint)
 #   Start adding waypoints (still holding shift)
-#   Release shift to go back to normal
+#   Release shift to go back to normal mode
 
 import rospy, roslib
 from estimate_position.msg import Position
 
-import pygame, sys, threading
+import pygame, sys, threading, argparse
 from pygame.locals import *
 from time import gmtime, strftime
 from ast import literal_eval
@@ -27,8 +60,17 @@ kilroys = []
 def main():
   global lock,kilroys
 
+  # Parse command line arguments
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--plot", help="Plots position on track",
+                      action="store_true")
+  parser.add_argument('--track', nargs=1, help="Choose an existing track")
+  args = parser.parse_args()
+
   lock = threading.Lock()
-  ros_init()
+  # Only need to init ROS if plotting of position is enabled
+  if args.plot:
+    ros_init()
 
   pygame.init()
   fpsClock = pygame.time.Clock()
@@ -39,7 +81,7 @@ def main():
   black = pygame.Color(0,0,0)
   label = font.render("x=0, y=0", 1, (0,0,0))
   id_text = font.render("-", 1, (0,0,0))
-  track,g_track = read_track()
+  track,g_track = read_track(args.track[0])
   shift_mode = False
   prev_pressed = None
 
@@ -51,12 +93,10 @@ def main():
     for point in g_track:
       color = change_color(color)
       pygame.draw.circle(screen, color, point, 6)
-
     # Draw received positions
-    if len(kilroys) > 1:
-      #pygame.draw.lines(screen, black, False, kilroys, 2)
+    if args.plot and len(kilroys) > 1:
       for point in kilroys:
-        pygame.draw.circle(screen, black, point, 1)
+        screen.set_at(point, black)
 
     if pygame.key.get_mods() & pygame.KMOD_SHIFT:
       shift_mode = True
@@ -95,15 +135,10 @@ def main():
         m_x,m_y = event.pos
         # If not in track, create new waypoint
         if not in_track(g_track,m_x,m_y):
-          track.append((x,y))
-          g_track.append((m_x,m_y))
-          print("(%.2f,%.2f)" % (x,y))
+          add_point(len(track),m_x,m_y,track,g_track)
         # Else remove the existing waypoint
         else:
-          (i,x1,y1) = where_in_track(g_track,m_x,m_y)
-          print("Removed (%.2f,%.2f)" % (track[i][0],track[i][1]))
-          track.pop(i)
-          g_track.pop(i)
+          remove_point(m_x,m_y,track,g_track)
       # Clear track
       elif event.type == KEYDOWN and event.key == K_c:
         del track[:]
@@ -135,25 +170,29 @@ def main():
     pygame.display.update()
     fpsClock.tick(30)
 
-def read_track():
-  if len(sys.argv) == 2:
-    g_track = []
-    with open (sys.argv[1], "r") as track_file:
-      track = literal_eval(track_file.read())
-    if not track or type(track[0]) is not tuple or type(track[0][0]) is not float:
-      track = []
-    else:
-      for (x,y) in track:
-        g_track.append(rescale_point(x,y))
-    return (track, g_track)
+
+def read_track(trackfile):
+  g_track = []
+  with open (trackfile, "r") as track_file:
+    track = literal_eval(track_file.read())
+  if not track or type(track[0]) is not tuple or type(track[0][0]) is not float:
+    track = []
   else:
-    return ([],[])
+    for (x,y) in track:
+      g_track.append(rescale_point(x,y))
+  return (track, g_track)
 
 def add_point(index,m_x,m_y,track,g_track):
   (x,y) = scale_point(m_x,m_y)
   track.insert(index, (x,y))
   g_track.insert(index, (m_x,m_y))
   print("(%.2f,%.2f)" % (x,y))
+
+def remove_point(m_x,m_y,track,g_track):
+  (i,x1,y1) = where_in_track(g_track,m_x,m_y)
+  print("Removed (%.2f,%.2f)" % (track[i][0],track[i][1]))
+  track.pop(i)
+  g_track.pop(i)
 
 def in_track(track,x,y):
   for x1,y1 in track:
