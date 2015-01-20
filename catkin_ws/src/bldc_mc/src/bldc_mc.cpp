@@ -108,8 +108,7 @@ int speed_to_rpm(float speed) {
   rpm = speed*MAX_RPM;
   if (abs(rpm) < MIN_RPM) {
     rpm = 0;
-  }
-  if (abs(rpm) > MAX_RPM) {
+  } else if (abs(rpm) > MAX_RPM) {
     rpm = MAX_RPM;
   }
   return rpm;
@@ -176,7 +175,7 @@ int set_steering(float angle, float angle_velocity) {
      We do not know why 114 seems to be the standard position,
      but it will keep the wheels in (almost) default position. 
      The motor controller wants a number between [114-70, 114+70] */
-  int16_t position = int16_t(angle*70/22+114);
+  int16_t position = int16_t(angle*70/22+115);
   cmd[2] = position >> 8;
   cmd[3] = position;
 
@@ -383,14 +382,17 @@ int main(int argc, char **argv)
 
   ros::Subscriber sub_mc_cmds = n.subscribe("mc_cmds", 1, callback);
 
-  // We pass the topic name to the US-sensor callback function
   bool enable_uss;
-  n.param<bool>("enable_uss", enable_uss, true);
+  n.param<bool>("bldc_mc/enable_uss", enable_uss, true);
   if (enable_uss) {
+    ROS_INFO("Enabling ultrasonic sensors\n");
+    // We pass the topic name to the US-sensor callback function
     ros::Subscriber sub_uss0 = n.subscribe<sensor_msgs::Range>("us_sensor0", 1, 
                                boost::bind(callback_uss, _1, "us_sensor0"));
     ros::Subscriber sub_uss1 = n.subscribe<sensor_msgs::Range>("us_sensor1", 1, 
                                boost::bind(callback_uss, _1, "us_sensor1"));
+  } else {
+    ROS_INFO("Ultrasonic sensors are not enabled.\n");
   }
 
   ros::Rate loop_rate(1000);
