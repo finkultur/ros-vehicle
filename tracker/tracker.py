@@ -37,8 +37,8 @@
 # Usage:
 # Click left mouse to create waypoint
 # Click on same point to remove
-# Press 'C' to clear track
-# Press 'P' to clear received Positions (if plotting enabled)
+# Press 'C' to clear waypoints
+# Press 'P' to clear received Positions
 # Press SPACE to print track to console
 # Press 'S' to save image of track
 # To insert point(s) in between:
@@ -81,7 +81,10 @@ def main():
   black = pygame.Color(0,0,0)
   label = font.render("x=0, y=0", 1, (0,0,0))
   id_text = font.render("-", 1, (0,0,0))
-  track,g_track = read_track(args.track[0])
+  if args.track:
+    track,g_track = read_track(args.track[0])
+  else:
+    track,g_track = [],[]
   shift_mode = False
   prev_pressed = None
 
