@@ -75,15 +75,15 @@ uint32_t get_reading(Serial* serial, uint8_t addr) {
 } 
 
 int main(int argc, char **argv) {	
-	Serial* sensor_0;
-	Serial* sensor_1;
+	ros::init(argc, argv, "SRF08");
 	ros::NodeHandle n;
 	ros::Rate loop_rate(5); // 5 Hz
 
+	Serial* sensor_0;
+	Serial* sensor_1;
+
 	sensor_msgs::Range msg_sensor_0;
 	sensor_msgs::Range msg_sensor_1;
-
-	ros::init(argc, argv, "SRF08");
 
 	// Sets the right type of the message
 	msg_sensor_0.radiation_type = msg_sensor_0.ULTRASOUND;
