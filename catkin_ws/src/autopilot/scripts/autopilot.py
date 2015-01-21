@@ -61,7 +61,7 @@ def callback_position(pos, pub):
   drive = AckermannDrive()
 
   # If we are close enough to current waypoint, aim for next.
-  if is_close_enough(wps[current_wp], pos.x, pos.y, config.WP_MARGIN):
+  if ap_utils.is_close_enough(wps[current_wp], pos.x, pos.y, config.WP_MARGIN):
     if current_wp < len(wps)-1:
       rospy.loginfo("I reached waypoint %i!" % (current_wp))
       current_wp += 1
@@ -79,7 +79,8 @@ def callback_position(pos, pub):
     drive.speed = 0.00
   
   # Set speed to 0 if you are outside your "comfort zone"
-  if not (config.MIN_X < x < config.MAX_X and config.MIN_Y < y < MAX_Y):
+  if not (config.MIN_X < pos.x < config.MAX_X and \
+          config.MIN_Y < pos.y < config.MAX_Y):
     drive.speed = 0.0
 
   # Set steering angle based on current position and next waypoint

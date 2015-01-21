@@ -83,8 +83,8 @@ def update_steering_angle(wp,cx,cy,heading,steering_angle):
   angle_error = get_angle_error(px,py,cx,cy,heading)
 
   p_term = angle_error * config.K_p
-  i_term += (angle_error / POS_UPDATE_FREQ) * config.K_i
-  d_term = ((angle_error - prev_error) * POS_UPDATE_FREQ) * config.K_d
+  i_term += (angle_error / config.POS_UPDATE_FREQ) * config.K_i
+  d_term = ((angle_error - prev_error) * config.POS_UPDATE_FREQ) * config.K_d
 
   steering_angle = p_term + i_term + d_term
   prev_error = angle_error
