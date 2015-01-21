@@ -14,8 +14,11 @@
 
 using namespace std;
 
-//#define m_per_tick 0.002173913043
-# define m_per_tick 0.00221238938 // 452 ticks/m
+//#define m_per_tick 0.0022371365   // 447 ticks/m
+#define m_per_tick 0.00222222222 // 450 ticks/m
+//#define m_per_tick 0.002173913043 // 451 ticks/m
+//#define m_per_tick 0.00221238938 // 452 ticks/m
+//#define m_per_tick 0.002197802197 // 455 ticks/m
 #define PI 3.14159265
 
 Kalman* filter;
