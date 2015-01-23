@@ -14,6 +14,7 @@ void pos_callback(const bldc_mc::MCValues::ConstPtr& msg) {
   }
   
   filter->update_model(pos, distance-start_distance, steering_angle);
+  recv_mc_values = true;
 }
 
 void imu_callback(const get_imu::IMUData::ConstPtr& msg) {
@@ -80,11 +81,16 @@ int main(int argc, char **argv) {
     ros::spinOnce();
 
     // publishes the position
-    pos_msg.x = pos->get_x();
-    pos_msg.y = pos->get_y();
-    pos_msg.heading = pos->get_heading();
-    pos_msg.header.stamp = ros::Time::now();
-    pos_publisher.publish(pos_msg);
+    if(recv_mc_values == true) {
+      pos_msg.x = pos->get_x();
+      pos_msg.y = pos->get_y();
+      pos_msg.heading = pos->get_heading();
+      pos_msg.header.stamp = ros::Time::now();
+      pos_publisher.publish(pos_msg);
+
+      recv_mc_values = false;
+    } 
+    
 
     /*
     // Published the position to rviz
