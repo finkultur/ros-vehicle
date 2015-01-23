@@ -36,4 +36,6 @@ double start_time;
 bool recv_first_bldc = false;
 double start_distance;
 
+bool recv_mc_values = false;
+
 void pos_callback(const bldc_mc::MCValues::ConstPtr& msg);
