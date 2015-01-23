@@ -160,7 +160,7 @@ def main():
       elif event.type == KEYDOWN and event.key == K_SPACE:
         print("wps = " + track_to_string(track))
       # Save track to image and textfile (.track)
-      elif event.type == KEYDOWN and event.key == K_s and track:
+      elif event.type == KEYDOWN and event.key == K_s and (track or kilroys):
         trackname = strftime("track_%Y-%m-%d-%H:%M:%S", gmtime())
         text_file = open(trackname + ".track", "w")
         text_file.write("%s" % track_to_string(track))
