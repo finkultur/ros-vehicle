@@ -26,7 +26,7 @@ using namespace boost;
 void callback(const ackermann_msgs::AckermannDrive::ConstPtr& msg) {
   ROS_INFO("Got a message!: \nSteering angle: %f\nSteering angle velocity:%f\nSpeed: %f\nAcceleration: %f\nJerk: %f\n", msg->steering_angle, msg->steering_angle_velocity, msg->speed,msg->acceleration, msg->jerk);
 
-  set_rpm(msg->speed);
+  set_current(msg->speed);
   set_steering(msg->steering_angle, msg->steering_angle_velocity);
 }
 
@@ -52,7 +52,7 @@ void callback_uss(const sensor_msgs::Range::ConstPtr& msg,
     set_duty(0);
   } else if (emergency && (us_sensor0 >= USS_RANGE && us_sensor1 >= USS_RANGE)) {
     emergency = false;
-    set_rpm(prev_speed);
+    set_current(prev_speed);
   }
 } 
 
@@ -116,9 +116,9 @@ int speed_to_rpm(float speed) {
 
 /*
   Sends a speed command to the motor controller.
-  Parameter speed is given in ampere.
+  Speed is in the range [-1.0,1.0]. Negative values is reverse.
 */
-int set_speed(float speed) {
+int set_current(float speed) {
   const int len = 5; // Speed commands are 5 bytes long
   uint8_t cmd[len] = {COMM_SET_CURRENT, 0x00, 0x00, 0x00, 0x00};
   int32_t speed_in_mA = -int(1000*speed_to_current(speed));

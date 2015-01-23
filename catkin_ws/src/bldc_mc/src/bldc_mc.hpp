@@ -37,7 +37,7 @@
 
 void callback_uss(const sensor_msgs::Range::ConstPtr& msg, const std::string &sensor_name);
 int init_mc();
-int set_speed(float speed);
+int set_current(float speed);
 float speed_to_current(float speed);
 int set_rpm(float speed);
 int speed_to_rpm(float speed);
