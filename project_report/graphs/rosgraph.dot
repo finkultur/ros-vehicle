@@ -1,5 +1,5 @@
 digraph graphname {
-	graph [bb="0,0,662,247",
+	graph [bb="0,0,694,229",
 		compound=True,
 		rank=same,
 		rankdir=LR,
@@ -7,11 +7,11 @@ digraph graphname {
 	];
 	node [label="\N"];
 	subgraph cluster_bldc_mc {
-		graph [bb="550,69,654,144",
+		graph [bb="582,69,686,144",
 			compound=True,
 			label=bldc_mc,
 			lheight=0.21,
-			lp="602,132.5",
+			lp="634,132.5",
 			lwidth=0.67,
 			rank=same,
 			rankdir=LR,
@@ -21,16 +21,16 @@ digraph graphname {
 		_bldc_mc		 [URL=_bldc_mc,
 			height=0.5,
 			label="/bldc_mc",
-			pos="602,95",
+			pos="634,95",
 			shape=ellipse,
 			width=1.2277];
 	}
 	subgraph cluster_pos_est {
-		graph [bb="124,138,220,213",
+		graph [bb="204,138,300,213",
 			compound=True,
 			label=pos_est,
 			lheight=0.21,
-			lp="172,201.5",
+			lp="252,201.5",
 			lwidth=0.57,
 			rank=same,
 			rankdir=LR,
@@ -40,119 +40,125 @@ digraph graphname {
 		_pos_est		 [URL=_pos_est,
 			height=0.5,
 			label="/pos_est",
-			pos="172,164",
+			pos="252,164",
 			shape=ellipse,
 			width=1.1013];
 	}
-	subgraph cluster_Autopilot {
-		graph [bb="323,138,433,213",
+	subgraph cluster_autopilot {
+		graph [bb="382,138,486,213",
 			compound=True,
-			label=Autopilot,
+			label=autopilot,
 			lheight=0.21,
-			lp="378,201.5",
-			lwidth=0.72,
+			lp="434,201.5",
+			lwidth=0.68,
 			rank=same,
 			rankdir=LR,
 			ranksep=0.2,
 			style=bold
 		];
-		_Autopilot		 [URL=_Autopilot,
+		_autopilot		 [URL=_autopilot,
 			height=0.5,
-			label="/Autopilot",
-			pos="378,164",
+			label="/autopilot",
+			pos="434,164",
 			shape=ellipse,
-			width=1.2999];
+			width=1.2277];
 	}
-	subgraph cluster_imu_data {
-		graph [bb="8,146,116,239",
+	subgraph cluster_get_imu {
+		graph [bb="8,146,108,221",
 			compound=True,
-			label=imu_data,
+			label=get_imu,
 			lheight=0.21,
-			lp="62,227.5",
-			lwidth=0.72,
+			lp="58,209.5",
+			lwidth=0.64,
 			rank=same,
 			rankdir=LR,
 			ranksep=0.2,
 			style=bold
 		];
-		_imu_data		 [URL=_imu_data,
+		_get_imu		 [URL=_get_imu,
 			height=0.5,
-			label="/imu_data",
-			pos="62,172",
+			label="/get_imu",
+			pos="58,172",
 			shape=ellipse,
-			width=1.2818];
-		_imu_data -> _imu_data		 [penwidth=1,
-			pos="e,81.336,188.66 42.664,188.66 38.367,198.62 44.812,208 62,208 73.011,208 79.613,204.15 81.806,198.77"];
+			width=1.1735];
 	}
-	subgraph cluster_US_range_data {
-		graph [bb="302,9,454,84",
+	subgraph cluster_get_uss {
+		graph [bb="386,9,482,84",
 			compound=True,
-			label=US_range_data,
+			label=get_uss,
 			lheight=0.21,
-			lp="378,72.5",
-			lwidth=1.17,
+			lp="434,72.5",
+			lwidth=0.57,
 			rank=same,
 			rankdir=LR,
 			ranksep=0.2,
 			style=bold
 		];
-		_US_range_data		 [URL=_US_range_data,
+		_get_uss		 [URL=_get_uss,
 			height=0.5,
-			label="/US_range_data",
-			pos="378,35",
+			label="/get_uss",
+			pos="434,35",
 			shape=ellipse,
-			width=1.8776];
+			width=1.1013];
 	}
 	_us_sensor0	 [URL=topic_3A_us_sensor0,
 		height=0.5,
 		label="/us_sensor0",
-		pos="502,72",
+		pos="534,72",
 		shape=box,
 		width=1.1111];
 	_us_sensor0 -> _bldc_mc	 [penwidth=1,
-		pos="e,563.4,86.175 542.01,81.156 545.76,82.035 549.58,82.932 553.39,83.827"];
+		pos="e,595.4,86.175 574.01,81.156 577.76,82.035 581.58,82.932 585.39,83.827"];
 	_mc_values	 [URL=topic_3A_mc_values,
 		height=0.5,
 		label="/mc_values",
-		pos="62,118",
+		pos="156,118",
 		shape=box,
 		width=1.0972];
 	_mc_values -> _pos_est	 [penwidth=1,
-		pos="e,142.41,151.82 101.69,134.48 111.87,138.81 122.84,143.49 132.99,147.81"];
+		pos="e,224.39,150.98 193.88,136.05 200.88,139.47 208.2,143.05 215.17,146.46"];
 	_Position	 [URL=topic_3A_Position,
 		height=0.5,
 		label="/Position",
-		pos="261,164",
+		pos="341,164",
 		shape=box,
 		width=0.90278];
-	_Position -> _Autopilot	 [penwidth=1,
-		pos="e,331.17,164 293.73,164 302.22,164 311.67,164 321.05,164"];
+	_Position -> _autopilot	 [penwidth=1,
+		pos="e,389.78,164 373.57,164 375.54,164 377.54,164 379.56,164"];
 	_mc_cmds	 [URL=topic_3A_mc_cmds,
 		height=0.5,
 		label="/mc_cmds",
-		pos="502,164",
+		pos="534,164",
 		shape=box,
 		width=1.0278];
 	_mc_cmds -> _bldc_mc	 [penwidth=1,
-		pos="e,579.08,110.44 528.75,145.87 541.59,136.83 557.2,125.84 570.62,116.39"];
+		pos="e,611.08,110.44 560.75,145.87 573.59,136.83 589.2,125.84 602.62,116.39"];
 	_us_sensor1	 [URL=topic_3A_us_sensor1,
 		height=0.5,
 		label="/us_sensor1",
-		pos="502,18",
+		pos="534,18",
 		shape=box,
 		width=1.1111];
 	_us_sensor1 -> _bldc_mc	 [penwidth=1,
-		pos="e,582.78,78.763 530.1,36.254 534.14,39.118 538.21,42.093 542,45 553.1,53.511 564.93,63.373 575.06,72.078"];
+		pos="e,614.78,78.763 562.1,36.254 566.14,39.118 570.21,42.093 574,45 585.1,53.511 596.93,63.373 607.06,72.078"];
+	_imu_data	 [URL=topic_3A_imu_data,
+		height=0.5,
+		label="/imu_data",
+		pos="156,172",
+		shape=box,
+		width=0.98611];
 	_imu_data -> _pos_est	 [penwidth=1,
-		pos="e,132.75,166.83 107.55,168.7 112.52,168.33 117.6,167.96 122.61,167.58"];
+		pos="e,212.93,167.24 191.74,169.04 195.4,168.73 199.18,168.41 202.96,168.09"];
 	_bldc_mc -> _mc_values	 [penwidth=1,
-		pos="e,101.5,118 560.62,101.71 516.23,108.5 442.74,118 379,118 260,118 260,118 260,118 209.45,118 151.61,118 111.74,118"];
+		pos="e,195.56,118 593.34,102.34 553.47,109.07 490.2,118 435,118 340,118 340,118 340,118 294.6,118 242.87,118 206.02,118"];
 	_pos_est -> _Position	 [penwidth=1,
-		pos="e,228.49,164 211.67,164 213.86,164 216.08,164 218.29,164"];
-	_Autopilot -> _mc_cmds	 [penwidth=1,
-		pos="e,464.7,164 425.12,164 434.74,164 444.87,164 454.5,164"];
-	_US_range_data -> _us_sensor0	 [penwidth=1,
-		pos="e,461.69,60.078 423.39,48.463 432.69,51.284 442.56,54.275 452.02,57.144"];
-	_US_range_data -> _us_sensor1	 [penwidth=1,
-		pos="e,461.82,23.459 438.21,26.749 442.72,26.121 447.24,25.491 451.68,24.873"];
+		pos="e,308.49,164 291.67,164 293.86,164 296.08,164 298.29,164"];
+	_autopilot -> _mc_cmds	 [penwidth=1,
+		pos="e,497,164 478.27,164 481.1,164 483.96,164 486.81,164"];
+	_get_imu -> _imu_data	 [penwidth=1,
+		pos="e,120.39,172 100.27,172 103.52,172 106.81,172 110.08,172"];
+	_get_uss -> _us_sensor0	 [penwidth=1,
+		pos="e,493.85,57.219 464.94,46.302 471.06,48.615 477.66,51.106 484.25,53.595"];
+	_get_uss -> _us_sensor1	 [penwidth=1,
+		pos="e,493.97,24.77 471.21,28.718 475.38,27.995 479.69,27.248 483.99,26.501"];
 }
