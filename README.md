@@ -76,3 +76,9 @@ Configuration can be done by editing the files
 *  dat295/vehicle/catkin_ws/src/master_dbj.launch  
 *  dat295/vehicle/catkin_ws/src/slave.launch  
 
+To let the car interpret speed commands as current instead of RPM,
+change the two calls to `set_rpm()` in
+`dat295/vehicle/catkin_ws/src/bldc_mc/src/bldc_mc.cpp` to `set_current()`. 
+Thismight be useful if the motor controller dies of a voltage drop. The probable
+cause is most likely a bad capacitor (and a too sudden speed change).
+
