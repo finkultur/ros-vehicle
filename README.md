@@ -13,35 +13,36 @@ Hardware
   * http://www.robot-electronics.co.uk/htm/usb_i2c_tech.htm
 
 We have forked Benjamins code for the motor controller.
-Our fork is on github at https://github.com/finkultur/bldc .
+Our fork is on github at https://github.com/finkultur/bldc .  
 
 
 1. Installation
 ---------------------
-  1.1. Install ROS by following the instruction at http://wiki.ros.org/indigo/Installation/Ubuntu  
+####  1.1. Install ROS by following the instruction at http://wiki.ros.org/indigo/Installation/Ubuntu  
 
-1.2. Clone the dat295 repository: `git clone https://<username>@bitbucket.org/thpe/dat295.git`  
-1.3. Fix udev rules  
+#### 1.2. Clone the dat295 repository: `git clone https://<username>@bitbucket.org/thpe/dat295.git`  
+
+#### 1.3. Fix udev rules  
   1.3.1. `cp dat295/99-usb-serial.rules /etc/udev/rules.d/`  
   1.3.2. Reload rules: `udevadm control --reload-rules`  
 
-1.4. Build and flash software for the motor controller board  
+#### 1.4. Build and flash software for the motor controller board  
   1.4.1. Clone the bldc repository: `git clone https://github.com/finkultur/bldc.git`  
   1.4.2. `cd bldc`  
   1.4.3. Compile and build: `make`  
   1.4.4. Flash motor controller: `st-flash write build/BLDC_4_ChibiOS.bin 0x8000000`  
 
-1.5. Build and flash software for the IMU  
+#### 1.5. Build and flash software for the IMU  
   1.5.1. `cd dat295/vehicle/DiscoveryBoard`  
   1.5.2. Compile and build: `make`  
   1.5.3. Flash: `st-flash write build/stm32f3discovery-demo.bin 0x8000000`  
 
-1.6. Build all ROS modules
+#### 1.6. Build all ROS modules  
   1.6.1. `cd dat295/vehicle/catkin_ws/`  
   1.6.2. `catkin_make`  
   1.6.3. `source devel/setup.bash`  
 
-1.7. Install joystick drivers:
+#### 1.7. Install joystick drivers:
   1.7.1. Install xboxdrv through your regular packet manager, e.g: `apt-get install xboxdrv`  
   1.7.2. Run `lsusb` to find out productId and vendorId of joystick  
 
@@ -69,9 +70,9 @@ Our fork is on github at https://github.com/finkultur/bldc .
 
 5. Configuration
 ---------------------
-Configuration can be done by editing the files  
-  dat295/vehicle/catkin_ws/src/autopilot/scripts/config.py  
-  dat295/vehicle/catkin_ws/src/master_autopilot.launch  
-  dat295/vehicle/catkin_ws/src/master_dbj.launch  
-  dat295/vehicle/catkin_ws/src/slave.launch  
+Configuration can be done by editing the files 
+* dat295/vehicle/catkin_ws/src/autopilot/scripts/config.py  
+* dat295/vehicle/catkin_ws/src/master_autopilot.launch  
+* dat295/vehicle/catkin_ws/src/master_dbj.launch  
+* dat295/vehicle/catkin_ws/src/slave.launch  
 
