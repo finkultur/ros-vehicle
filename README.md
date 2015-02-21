@@ -15,3 +15,17 @@ Hardware:
 We have forked Benjamins code for the motor controller.
 Our fork is on github:
 * https://github.com/finkultur/bldc
+
+General:
+--------
+1. source...
+
+Autopilot:
+----------
+1. start the master: `roscore`
+2. lauch the autopilot ...
+
+Manual:
+-------
+1.
+2. joystick

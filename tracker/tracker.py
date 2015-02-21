@@ -56,9 +56,10 @@ from time import gmtime, strftime
 from ast import literal_eval
 
 kilroys = []
+rcm_positions = []
 
 def main():
-  global lock,kilroys
+  global lock,kilroys,lock2,rcm_positions
 
   # Parse command line arguments
   parser = argparse.ArgumentParser()
@@ -68,6 +69,7 @@ def main():
   args = parser.parse_args()
 
   lock = threading.Lock()
+  lock2 = threading.Lock()
   # Only need to init ROS if plotting of position is enabled
   if args.plot:
     ros_init()
@@ -79,6 +81,7 @@ def main():
   mapbg = pygame.image.load('map_700.jpg')
   font = pygame.font.SysFont("monospace", 15)
   black = pygame.Color(0,0,0)
+  red = pygame.Color(255,0,0)
   label = font.render("x=0, y=0", 1, (0,0,0))
   id_text = font.render("-", 1, (0,0,0))
   if args.track:
@@ -100,6 +103,10 @@ def main():
     if args.plot and len(kilroys) > 1:
       for point in kilroys:
         screen.set_at(point, black)
+    # Draw received RCM positions
+    if args.plot and len(rcm_positions) > 1:
+      for point in rcm_positions:
+        screen.set_at(point, red)
 
     if pygame.key.get_mods() & pygame.KMOD_SHIFT:
       shift_mode = True
@@ -155,12 +162,19 @@ def main():
           del kilroys[:]
         finally:
           lock.release()
+        # Also clear received positions from RCM
+        lock2.acquire()
+        try:
+          del rcm_positions[:]
+        finally:
+          lock2.release()
         print("Cleared received positions")
       # Print track
       elif event.type == KEYDOWN and event.key == K_SPACE:
         print("wps = " + track_to_string(track))
       # Save track to image and textfile (.track)
-      elif event.type == KEYDOWN and event.key == K_s and (track or kilroys):
+      elif event.type == KEYDOWN and event.key == K_s and \
+           (track or kilroys or rcm_positions):
         trackname = strftime("track_%Y-%m-%d-%H:%M:%S", gmtime())
         text_file = open(trackname + ".track", "w")
         text_file.write("%s" % track_to_string(track))
@@ -242,10 +256,22 @@ def callback_position(pos):
   finally:
     lock.release()
 
+def callback_rcm(pos):
+  global rcm_positions, lock2
+  print("Got an RCM position! x=%f, y=%f, heading=%f" % (pos.x,-pos.y,pos.heading))
+  x,y = rescale_point((pos.x/1000+0.368),-(pos.y/1000+0.382))
+  lock2.acquire()
+  try:
+    rcm_positions.append((x,y))
+  finally:
+    lock2.release()
+
+
 def ros_init():
   rospy.init_node("tracker", anonymous=True)
   # Subscribe to Position
   rospy.Subscriber("Position", Position, callback_position)
+  rospy.Subscriber("Position_rcm", Position, callback_rcm)
 
 if __name__ == '__main__':
   main()
