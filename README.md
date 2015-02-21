@@ -70,9 +70,9 @@ Our fork is on github at https://github.com/finkultur/bldc .
 
 5. Configuration
 ---------------------
-Configuration can be done by editing the files 
-* dat295/vehicle/catkin_ws/src/autopilot/scripts/config.py  
-* dat295/vehicle/catkin_ws/src/master_autopilot.launch  
-* dat295/vehicle/catkin_ws/src/master_dbj.launch  
-* dat295/vehicle/catkin_ws/src/slave.launch  
+Configuration can be done by editing the files  
+*  dat295/vehicle/catkin_ws/src/autopilot/scripts/config.py  
+*  dat295/vehicle/catkin_ws/src/master_autopilot.launch  
+*  dat295/vehicle/catkin_ws/src/master_dbj.launch  
+*  dat295/vehicle/catkin_ws/src/slave.launch  
 
